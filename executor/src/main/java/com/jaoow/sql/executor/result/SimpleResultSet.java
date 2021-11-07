@@ -5,6 +5,7 @@ import org.jetbrains.annotations.NotNull;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.Iterator;
 
 @SuppressWarnings("unchecked")
 @RequiredArgsConstructor(staticName = "of", onConstructor_ = {@NotNull})
@@ -35,7 +36,7 @@ public final class SimpleResultSet implements AutoCloseable {
     }
 
     @Override
-    public void close() throws Exception {
+    public void close() throws SQLException {
         resultSet.close();
     }
 }

@@ -38,7 +38,7 @@ public final class SimpleStatement implements AutoCloseable {
     }
 
     @Override
-    public void close() throws Exception {
+    public void close() throws SQLException {
         preparedStatement.close();
     }
 }
