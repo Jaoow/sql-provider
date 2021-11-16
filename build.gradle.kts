@@ -16,7 +16,7 @@ subprojects {
     }
 
     dependencies {
-        val lombokVersion = "1.18.20"
+        val lombokVersion = "1.18.22"
         val jetbrainsAnnotationsVersion = "21.0.1"
 
         compileOnly("org.projectlombok:lombok:$lombokVersion")
