@@ -4,21 +4,31 @@ import com.jaoow.sql.connector.SQLConnector;
 import com.jaoow.sql.connector.type.SQLDatabaseType;
 import lombok.Builder;
 import lombok.Getter;
+import org.sqlite.SQLiteConfig;
+import org.sqlite.SQLiteDataSource;
 
 import java.io.File;
 import java.io.IOException;
 import java.sql.Connection;
-import java.sql.DriverManager;
 import java.sql.SQLException;
 
 @Getter
 public final class SQLiteDatabaseType extends SQLDatabaseType {
 
+    private final SQLiteDataSource source;
     private final File file;
 
     public SQLiteDatabaseType(String driverClassName, String jdbcUrl, File file) {
         super(driverClassName, jdbcUrl);
         this.file = file;
+
+        SQLiteConfig config = new SQLiteConfig();
+        config.setJournalMode(SQLiteConfig.JournalMode.WAL);
+        config.setSynchronous(SQLiteConfig.SynchronousMode.NORMAL);
+        config.setTempStore(SQLiteConfig.TempStore.MEMORY);
+        config.setPageSize(32768);
+
+        source = new SQLiteDataSource(config);
     }
 
     @Builder
@@ -42,6 +52,7 @@ public final class SQLiteDatabaseType extends SQLDatabaseType {
                     throw new IOException("The database file cannot be created.");
                 }
             }
+
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -49,12 +60,20 @@ public final class SQLiteDatabaseType extends SQLDatabaseType {
 
     @Override
     public SQLConnector connect() throws SQLException {
+
         try {
             Class.forName(this.getDriverClassName());
         } catch (ClassNotFoundException e) {
             throw new SQLException("Driver not found.");
         }
-        Connection connection = DriverManager.getConnection(this.getJdbcUrl());
-        return consumer -> consumer.accept(connection);
+
+        return consumer -> {
+            try(Connection connection = source.getConnection()) {
+                consumer.accept(connection);
+
+            } catch (SQLException exception) {
+                exception.printStackTrace();
+            }
+        };
     }
 }
