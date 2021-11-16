@@ -11,13 +11,13 @@ import org.intellij.lang.annotations.Language;
 import org.jetbrains.annotations.NotNull;
 
 import java.sql.SQLException;
-import java.util.LinkedHashSet;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
 import java.util.concurrent.ForkJoinPool;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
+import java.util.function.Function;
 
 @RequiredArgsConstructor
 public final class SQLExecutor {
@@ -37,7 +37,7 @@ public final class SQLExecutor {
     }
 
     /**
-     * execute a database statement in asynchronous thread
+     * Execute a database statement in asynchronous thread
      *
      * @param sql the sql statement
      * @param consumer the @{@link SimpleStatement} to prepare statement
@@ -45,13 +45,13 @@ public final class SQLExecutor {
      * @see #execute(String, Consumer) to execute statement in synchronously
      */
     public CompletableFuture<Void> executeAsync(@Language("MySQL") @NotNull String sql,
-                                                @NotNull Consumer<SimpleStatement> consumer) {
-
+                                                @NotNull Consumer<SimpleStatement> consumer
+    ) {
         return CompletableFuture.runAsync(() -> execute(sql, consumer), executor);
     }
 
     /**
-     * execute a database statement.
+     * Execute a database statement.
      *
      * @param sql the sql statement
      * @param consumer the @{@link SimpleStatement} to prepare statement
@@ -70,7 +70,7 @@ public final class SQLExecutor {
     }
 
     /**
-     * execute a database statement in asynchronous thread
+     * Execute a database statement in asynchronous thread
      *
      * @param sql the sql statement
      * @see #execute(String) to execute statment in synchronously.
@@ -80,7 +80,7 @@ public final class SQLExecutor {
     }
 
     /**
-     * execute a database statement.
+     * Execute a database statement.
      *
      * @param sql the sql statement
      * @see #executeAsync(String) to execute statement in asynchronous thread
@@ -90,28 +90,157 @@ public final class SQLExecutor {
     }
 
     /**
-     * Select entities from a given SQL query
+     * Execute a database query in asynchronous thread.
      *
-     * @param <T>      The entity type to return
-     * @param query    The query to select entities
-     * @param consumer The statement consumer
-     * @param mapper   The mapper used to build entities
-     * @return The entities found
+     * @param query the sql query
+     * @param consumer the @{@link SimpleStatement} to prepare query
+     * @param function the function to map @{@link SimpleResultSet}
+     * @param <T> the returned type
+     * @return the completable future of optional query result
+     * @see #query(String, Consumer, Function)  to execute in synchronously
      */
-    public <T> T resultQuery(String query, Consumer<SimpleStatement> consumer, SQLResultAdapter<T> mapper) {
-        AtomicReference<T> value = new AtomicReference<>();
+    public <T> CompletableFuture<Optional<T>> queryAsync(@Language("MySQL") @NotNull String query,
+                                                         @NotNull Consumer<SimpleStatement> consumer,
+                                                         @NotNull Function<SimpleResultSet, T> function
+    ) {
+        return CompletableFuture.supplyAsync(() -> query(query, consumer, function), executor);
+    }
+
+    /**
+     * Execute a database query.
+     *
+     * @param query the sql query
+     * @param consumer the @{@link SimpleStatement} to prepare query
+     * @param function the function to map @{@link SimpleResultSet}
+     * @param <T> the returned type
+     * @return the optional result of query
+     * @see #queryAsync(String, Consumer, Function) to query in asynchronous thread.
+     */
+    public <T> Optional<T> query(@Language("MySQL") @NotNull String query,
+                                 @NotNull Consumer<SimpleStatement> consumer,
+                                 @NotNull Function<SimpleResultSet, T> function
+    ) {
+        AtomicReference<Optional<T>> reference = new AtomicReference<>(Optional.empty());
         sqlConnector.execute(connection -> {
             try (SimpleStatement statement = SimpleStatement.of(connection.prepareStatement(query))) {
                 consumer.accept(statement);
-
                 try (SimpleResultSet resultSet = statement.executeQuery()) {
-                    value.set(mapper.adaptResult(resultSet));
+                    reference.set(Optional.ofNullable(function.apply(resultSet)));
                 }
-            } catch (SQLException e) {
-                e.printStackTrace();
+
+            } catch (SQLException exception) {
+                exception.printStackTrace();
             }
         });
-        return value.get();
+
+        return reference.get();
+    }
+
+    /**
+     * Execute a database query in asynchronous thread.
+     *
+     * @param query the sql query
+     * @param function the function to map @{@link SimpleResultSet}
+     * @param <T> the returned type
+     * @return the completable future of optional query result
+     * @see #query(String, Function) to execute in synchronously
+     */
+    public <T> CompletableFuture<Optional<T>> queryAsync(@Language("MySQL") @NotNull String query,
+                                                         @NotNull Function<SimpleResultSet, T> function
+    ) {
+        return CompletableFuture.supplyAsync(() -> query(query, function), executor);
+    }
+
+    /**
+     * Execute a database query.
+     *
+     * @param query the sql query
+     * @param function the function to map @{@link SimpleResultSet}
+     * @param <T> the returned type
+     * @return the optional result of query
+     * @see #queryAsync(String, Function) to execute in asynchronous thread.
+     */
+    public <T> Optional<T> query(@Language("MySQL") @NotNull String query, @NotNull Function<SimpleResultSet, T> function) {
+        return query(query, statement -> {}, function);
+    }
+
+    /**
+     * Execute a database query in asynchronous thread.
+     *
+     * @param query the sql query
+     * @param adapter the adapter to map @{@link SimpleResultSet}
+     * @param <T> the returned type
+     * @return the completable future of optional query result
+     * @see #query(String, Consumer, SQLResultAdapter) to execute in synchronously
+     */
+    public <T> CompletableFuture<Optional<T>> queryAsync(@Language("MySQL") @NotNull String query,
+                                                         @NotNull SQLResultAdapter<T> adapter
+    ) {
+        return CompletableFuture.supplyAsync(() -> query(query, adapter), executor);
+    }
+
+    /**
+     * Execute a database query.
+     *
+     * @param query the sql query
+     * @param adapter the adapter to map @{@link SimpleResultSet}
+     * @param <T> the returned type
+     * @return the optional result of query
+     * @see #queryAsync(String, SQLResultAdapter) to execute in asynchronous thread.
+     */
+    public <T> Optional<T> query(@Language("MySQL") @NotNull String query, @NotNull SQLResultAdapter<T> adapter) {
+        return query(query, statement -> {}, adapter);
+    }
+
+    /**
+     * Execute a database query in asynchronous thread.
+     *
+     * @param query the sql query
+     * @param consumer the @{@link SimpleStatement} to prepare query
+     * @param adapter the adapter to map @{@link SimpleResultSet}
+     * @param <T> the returned type
+     * @return the completable future of optional query result
+     * @see #query(String, Consumer, SQLResultAdapter) to execute in synchronously
+     */
+    public <T> CompletableFuture<Optional<T>> queryAsync(@Language("MySQL") @NotNull String query,
+                                                         @NotNull Consumer<SimpleStatement> consumer,
+                                                         @NotNull SQLResultAdapter<T> adapter
+    ) {
+        return CompletableFuture.supplyAsync(() -> query(query, consumer, adapter), executor);
+    }
+
+    /**
+     * Execute a database query.
+     *
+     * @param query the sql query
+     * @param consumer consumer the @{@link SimpleStatement} to prepare queue
+     * @param mapper the @{@link SQLResultAdapter} to map result
+     * @param <T> the returned type
+     * @return the optional result of query
+     * @see #queryAsync(String, Consumer, SQLResultAdapter) to execute in asynchronous thread
+     */
+    public <T> Optional<T> query(@Language("MySQL") @NotNull String query,
+                                 @NotNull Consumer<SimpleStatement> consumer,
+                                 @NotNull SQLResultAdapter<T> mapper
+    ) {
+        return query(query, consumer, mapper::adaptResult);
+    }
+
+    /**
+     * Execute a database query.
+     *
+     * @param query the sql query
+     * @param consumer the @{@link SimpleResultSet} to prepare query
+     * @param adapter the @{@link SQLResultAdapter} to map result set
+     * @param <T> the returned type
+     * @return the completable future of optional query result
+     * @see #resultQuery(String, Consumer, Class) to execute in synchronously
+     */
+    public <T> CompletableFuture<Optional<T>> resultQueryAsync(@Language("MySQL") @NotNull String query,
+                                                               @NotNull Consumer<SimpleStatement> consumer,
+                                                               @NotNull Class<? extends SQLResultAdapter<T>> adapter
+    ) {
+        return CompletableFuture.supplyAsync(() -> resultQuery(query, consumer, adapter), executor);
     }
 
     /**
@@ -122,12 +251,13 @@ public final class SQLExecutor {
      * @param consumer      The statement consumer
      * @param resultAdapter The adapter used to build the entity.
      * @return The entity founded, or null
+     * @see #resultQueryAsync(String, Consumer, Class) to execute in asynchronous thread
      */
-    public <T> T resultOneQuery(String query,
-                                Consumer<SimpleStatement> consumer,
-                                Class<? extends SQLResultAdapter<T>> resultAdapter
+    public <T> Optional<T> resultQuery(@Language("MySQL") @NotNull String query,
+                                       @NotNull Consumer<SimpleStatement> consumer,
+                                       @NotNull Class<? extends SQLResultAdapter<T>> resultAdapter
     ) {
-        return resultQuery(query, consumer, resultSet -> {
+        return query(query, consumer, resultSet -> {
 
             if (resultSet.next()) {
                 SQLResultAdapter<T> adapter = adapterProvider.getAdapter(resultAdapter);
@@ -139,6 +269,60 @@ public final class SQLExecutor {
     }
 
     /**
+     * Execute a database query.
+     *
+     * @param query the sql query
+     * @param adapter the @{@link SQLResultAdapter} to map result set
+     * @param <T> the returned type
+     * @return the completable future of optional query result
+     * @see #resultQuery(String, Consumer, Class) to execute in synchronously
+     */
+    public <T> CompletableFuture<Optional<T>> resultQueryAsync(@Language("MySQL") @NotNull String query,
+                                                               @NotNull Class<? extends SQLResultAdapter<T>> adapter
+    ) {
+        return CompletableFuture.supplyAsync(() -> resultQuery(query, statement -> {}, adapter), executor);
+    }
+
+    /**
+     * Select a single entity from a given SQL query
+     *
+     * @param <T>           The entity type to return.
+     * @param query         The query to select the entity.
+     * @param resultAdapter The adapter used to build the entity.
+     * @return The entity founded, or null
+     * @see #resultQueryAsync(String, Class)  to execute in asynchronous thread
+     */
+    public <T> Optional<T> resultQuery(@Language("MySQL") @NotNull String query,
+                                       @NotNull Class<? extends SQLResultAdapter<T>> resultAdapter
+    ) {
+        return query(query, statement -> {}, resultSet -> {
+
+            if (resultSet.next()) {
+                SQLResultAdapter<T> adapter = adapterProvider.getAdapter(resultAdapter);
+                return adapter.adaptResult(resultSet);
+            }
+
+            return null;
+        });
+    }
+
+    /**
+     * Execute a database query
+     *
+     * @param query the sql query
+     * @param consumer the @{@link SimpleStatement} to prepare query
+     * @param adapter the @{@link SQLResultAdapter} to map result
+     * @param <T> the returned type
+     * @return the completable future of @{@link Set} of result
+     */
+    public <T> CompletableFuture<Set<T>> resultSetQueryAsync(@Language("MySQL") @NotNull String query,
+                                                             @NotNull Consumer<SimpleStatement> consumer,
+                                                             @NotNull Class<? extends SQLResultAdapter<T>> adapter) {
+
+        return CompletableFuture.supplyAsync(() -> resultSetQuery(query, consumer, adapter), executor);
+    }
+
+    /**
      * Select entities from a given SQL query
      *
      * @param <T>           The entity type to return
@@ -147,18 +331,52 @@ public final class SQLExecutor {
      * @param resultAdapter The adapter used to build the entities.
      * @return The entities found
      */
-    public <T> Set<T> resultManyQuery(String query,
-                                      Consumer<SimpleStatement> consumer,
-                                      Class<? extends SQLResultAdapter<T>> resultAdapter
+    public <T> Set<T> resultSetQuery(@Language("MySQL") @NotNull String query,
+                                     @NotNull Consumer<SimpleStatement> consumer,
+                                     @NotNull Class<? extends SQLResultAdapter<T>> resultAdapter
     ) {
-        return this.resultQuery(query, consumer, resultSet -> {
+        return this.query(query, consumer, result -> {
             SQLResultAdapter<T> adapter = adapterProvider.getAdapter(resultAdapter);
             Set<T> elements = new LinkedHashSet<>();
-            while (resultSet.next()) {
-                elements.add(adapter.adaptResult(resultSet));
+
+            while (result.next()) {
+                T value = adapter.adaptResult(result);
+                if (value != null) {
+                    elements.add(value);
+                }
             }
 
             return elements;
-        });
+
+        }).orElse(Collections.emptySet());
     }
+
+    /**
+     * Execute a database query
+     *
+     * @param query the sql query
+     * @param adapter the @{@link SQLResultAdapter} to map result
+     * @param <T> the returned type
+     * @return the completable future of @{@link Set} of result
+     */
+    public <T> CompletableFuture<Set<T>> resultSetQueryAsync(@Language("MySQL") @NotNull String query,
+                                                             @NotNull Class<? extends SQLResultAdapter<T>> adapter) {
+
+        return CompletableFuture.supplyAsync(() -> resultSetQuery(query, adapter), executor);
+    }
+
+    /**
+     * Select entities from a given SQL query
+     *
+     * @param <T>           The entity type to return
+     * @param query         The query to select entities
+     * @param resultAdapter The adapter used to build the entities.
+     * @return The entities found
+     */
+    public <T> Set<T> resultSetQuery(@Language("MySQL") @NotNull String query,
+                                     @NotNull Class<? extends SQLResultAdapter<T>> resultAdapter
+    ) {
+        return resultSetQuery(query, statement -> {}, resultAdapter);
+    }
+
 }
