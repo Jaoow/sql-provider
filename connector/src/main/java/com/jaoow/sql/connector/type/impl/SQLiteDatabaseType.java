@@ -4,6 +4,7 @@ import com.jaoow.sql.connector.SQLConnector;
 import com.jaoow.sql.connector.type.SQLDatabaseType;
 import lombok.Builder;
 import lombok.Getter;
+import org.jetbrains.annotations.NotNull;
 import org.sqlite.SQLiteConfig;
 import org.sqlite.SQLiteDataSource;
 
@@ -18,7 +19,7 @@ public final class SQLiteDatabaseType extends SQLDatabaseType {
     private final SQLiteDataSource source;
     private final File file;
 
-    public SQLiteDatabaseType(String driverClassName, String jdbcUrl, File file) {
+    public SQLiteDatabaseType(@NotNull String driverClassName, @NotNull String jdbcUrl, @NotNull File file) {
         super(driverClassName, jdbcUrl);
         this.file = file;
 
@@ -34,7 +35,7 @@ public final class SQLiteDatabaseType extends SQLDatabaseType {
     }
 
     @Builder
-    public SQLiteDatabaseType(File file) {
+    public SQLiteDatabaseType(@NotNull File file) {
         this(
                 "org.sqlite.JDBC",
                 "jdbc:sqlite:" + file,

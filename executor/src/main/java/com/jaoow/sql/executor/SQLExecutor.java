@@ -7,45 +7,86 @@ import com.jaoow.sql.executor.result.SimpleResultSet;
 import com.jaoow.sql.executor.statement.SimpleStatement;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
+import org.intellij.lang.annotations.Language;
+import org.jetbrains.annotations.NotNull;
 
 import java.sql.SQLException;
 import java.util.LinkedHashSet;
 import java.util.Set;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.Executor;
+import java.util.concurrent.ForkJoinPool;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
-import java.util.logging.Logger;
 
-@Getter
 @RequiredArgsConstructor
 public final class SQLExecutor {
 
-    private final SQLConnector sqlConnector;
-    private final SQLResultAdapterProvider adapterProvider = SQLResultAdapterProvider.getInstance();
+    @NotNull private final SQLConnector sqlConnector;
+    @NotNull private Executor executor = ForkJoinPool.commonPool();
+
+    @Getter private final SQLResultAdapterProvider adapterProvider = SQLResultAdapterProvider.getInstance();
 
     /**
-     * Execute a query for UPDATE, INSERT or DELETE
+     * Set the executor to perform asynchronous statements
      *
-     * @param query    The query to execute
-     * @param consumer The statement consumer
+     * @param executor tbe @{@link Executor}
      */
-    public void updateQuery(String query, Consumer<SimpleStatement> consumer) {
+    public void setExecutor(@NotNull Executor executor) {
+        this.executor = executor;
+    }
+
+    /**
+     * execute a database statement in asynchronous thread
+     *
+     * @param sql the sql statement
+     * @param consumer the @{@link SimpleStatement} to prepare statement
+     * @return the completable future of execution
+     * @see #execute(String, Consumer) to execute statement in synchronously
+     */
+    public CompletableFuture<Void> executeAsync(@Language("MySQL") @NotNull String sql,
+                                                @NotNull Consumer<SimpleStatement> consumer) {
+
+        return CompletableFuture.runAsync(() -> execute(sql, consumer), executor);
+    }
+
+    /**
+     * execute a database statement.
+     *
+     * @param sql the sql statement
+     * @param consumer the @{@link SimpleStatement} to prepare statement
+     * @see #executeAsync(String, Consumer) to execute statement in asynchronous thread
+     */
+    public void execute(@Language("MySQL") @NotNull String sql, @NotNull Consumer<SimpleStatement> consumer) {
         sqlConnector.execute(connection -> {
-            try (SimpleStatement statement = SimpleStatement.of(connection.prepareStatement(query))) {
+            try(SimpleStatement statement = SimpleStatement.of(connection.prepareStatement(sql))) {
                 consumer.accept(statement);
-                statement.executeUpdate();
-            } catch (SQLException e) {
-                e.printStackTrace();
+                statement.execute();
+
+            } catch (SQLException exception) {
+                exception.printStackTrace();
             }
         });
     }
 
     /**
-     * Execute a query for UPDATE, INSERT or DELETE
+     * execute a database statement in asynchronous thread
      *
-     * @param query The query to execute
+     * @param sql the sql statement
+     * @see #execute(String) to execute statment in synchronously.
      */
-    public void updateQuery(String query) {
-        updateQuery(query, statement -> {});
+    public void executeAsync(@Language("MySQL") @NotNull String sql) {
+        CompletableFuture.runAsync(() -> execute(sql), executor);
+    }
+
+    /**
+     * execute a database statement.
+     *
+     * @param sql the sql statement
+     * @see #executeAsync(String) to execute statement in asynchronous thread
+     */
+    public void execute(@Language("MySQL") @NotNull String sql) {
+        executeAsync(sql, simpleStatement -> {});
     }
 
     /**

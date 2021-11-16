@@ -20,6 +20,14 @@ public final class SimpleStatement implements AutoCloseable {
         }
     }
 
+    public void execute() {
+        try {
+            preparedStatement.execute();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
     public void executeUpdate() {
         try {
             preparedStatement.executeUpdate();
