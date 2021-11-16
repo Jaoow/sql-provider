@@ -9,11 +9,20 @@ import org.jetbrains.annotations.NotNull;
 
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 
 public final class MySQLDatabaseType extends SQLDatabaseType {
 
     private final HikariDataSource dataSource = new HikariDataSource();
+
+    // https://github.com/lucko/helper/blob/master/helper-sql/src/main/java/me/lucko/helper/sql/plugin/HelperSql.java
+    private static final int MAXIMUM_POOL_SIZE = (Runtime.getRuntime().availableProcessors() * 2) + 1;
+    private static final int MINIMUM_IDLE = Math.min(MAXIMUM_POOL_SIZE, 10);
+
+    private static final long MAX_LIFETIME = TimeUnit.MINUTES.toMillis(30);
+    private static final long CONNECTION_TIMEOUT = TimeUnit.SECONDS.toMillis(10);
+    private static final long LEAK_DETECTION_THRESHOLD = TimeUnit.SECONDS.toMillis(10);
 
     @Builder
     public MySQLDatabaseType(String address, String username, String password, String database) {
@@ -26,6 +35,31 @@ public final class MySQLDatabaseType extends SQLDatabaseType {
 
         dataSource.setUsername(username);
         dataSource.setPassword(password);
+
+        dataSource.setMaximumPoolSize(MAXIMUM_POOL_SIZE);
+        dataSource.setMinimumIdle(MINIMUM_IDLE);
+
+        dataSource.setMaxLifetime(MAX_LIFETIME);
+        dataSource.setConnectionTimeout(CONNECTION_TIMEOUT);
+        dataSource.setLeakDetectionThreshold(LEAK_DETECTION_THRESHOLD);
+
+        dataSource.addDataSourceProperty("useUnicode", true);
+        dataSource.addDataSourceProperty("characterEncoding", "utf8");
+
+        dataSource.addDataSourceProperty("cachePrepStmts", "true");
+        dataSource.addDataSourceProperty("prepStmtCacheSize", "250");
+        dataSource.addDataSourceProperty("prepStmtCacheSqlLimit", "2048");
+        dataSource.addDataSourceProperty("useServerPrepStmts", "true");
+        dataSource.addDataSourceProperty("useLocalSessionState", "true");
+        dataSource.addDataSourceProperty("rewriteBatchedStatements", "true");
+        dataSource.addDataSourceProperty("cacheResultSetMetadata", "true");
+        dataSource.addDataSourceProperty("cacheServerConfiguration", "true");
+        dataSource.addDataSourceProperty("elideSetAutoCommits", "true");
+        dataSource.addDataSourceProperty("maintainTimeStats", "false");
+        dataSource.addDataSourceProperty("alwaysSendSetIsolation", "false");
+        dataSource.addDataSourceProperty("cacheCallableStmts", "true");
+
+        dataSource.addDataSourceProperty("socketTimeout", String.valueOf(TimeUnit.SECONDS.toMillis(30)));
     }
 
     @Contract("_ -> this")
