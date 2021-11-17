@@ -25,9 +25,9 @@ public final class MySQLDatabaseType extends SQLDatabaseType {
     private static final long LEAK_DETECTION_THRESHOLD = TimeUnit.SECONDS.toMillis(10);
 
     @Builder
-    public MySQLDatabaseType(String address, String username, String password, String database) {
+    public MySQLDatabaseType(@NotNull String address, @NotNull String username, @NotNull String password, @NotNull String database) {
         super(
-                "com.mysql.jdbc.Driver",
+                "com.mysql.cj.jdbc.Driver",
                 "jdbc:mysql://" + address + "/" + database);
 
         dataSource.setJdbcUrl(super.getJdbcUrl());
