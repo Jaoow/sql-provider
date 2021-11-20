@@ -36,7 +36,6 @@ public class SQLExecutorBuilder {
      * Set the @{@link Executor} of asynchronous threads.
      *
      * @param executor the @{@link Executor}
-     *
      * @return the @{@link SQLExecutorBuilder}
      */
 
@@ -49,10 +48,9 @@ public class SQLExecutorBuilder {
     /**
      * Register adapters to map queries.
      *
-     * @param clazz the class of adapter
+     * @param clazz   the class of adapter
      * @param adapter the @{@link SQLResultAdapter} of clazz
-     * @param <T> the type
-     *
+     * @param <T>     the type
      * @return the @{@link SQLExecutorBuilder}
      */
 
@@ -76,5 +74,4 @@ public class SQLExecutorBuilder {
                 new SQLExecutor(connector, immutable, executor);
 
     }
-
 }

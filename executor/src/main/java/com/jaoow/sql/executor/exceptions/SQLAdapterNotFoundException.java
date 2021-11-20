@@ -17,6 +17,7 @@ public class SQLAdapterNotFoundException extends SQLExecutorException {
 
     /**
      * Create an exception with cause
+     *
      * @param message the cause
      */
     public SQLAdapterNotFoundException(String message) {
@@ -25,6 +26,7 @@ public class SQLAdapterNotFoundException extends SQLExecutorException {
 
     /**
      * Create an exception with name of invalid class
+     *
      * @param clazz the invalid class
      */
     public SQLAdapterNotFoundException(Class<?> clazz) {

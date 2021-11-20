@@ -17,6 +17,7 @@ public class SQLExecutorException extends RuntimeException {
 
     /**
      * Create an exception with cause
+     *
      * @param message the cause
      */
     public SQLExecutorException(String message) {
