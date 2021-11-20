@@ -19,6 +19,9 @@ import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
+/**
+ * Class to execute database statments more easily
+ */
 @RequiredArgsConstructor @AllArgsConstructor
 public final class SQLExecutor {
 
@@ -28,6 +31,11 @@ public final class SQLExecutor {
     @NotNull
     private Executor executor = ForkJoinPool.commonPool();
 
+    /**
+     * Create an instance of @{@link SQLExecutor}
+     *
+     * @param connector the @{@link SQLConnector}
+     */
     public SQLExecutor(@NotNull SQLConnector connector) {
         this.sqlConnector = connector;
         this.adapterMap = new HashMap<>();
@@ -323,6 +331,7 @@ public final class SQLExecutor {
      * @param query the sql query
      * @param clazz the class to search @{@link SQLResultAdapter}
      * @param <T> the returned type
+     *
      * @return the completable future of @{@link Set} of result
      * @see #queryMany(String, Class) to execute in synchronously
      * @throws NullPointerException if {@link SQLResultAdapter} is null
@@ -337,6 +346,7 @@ public final class SQLExecutor {
      * @param <T> the entity type to return
      * @param query the query to select entities
      * @param clazz the class to search @{@link SQLResultAdapter}
+     *
      * @return The entities found
      * @see #queryManyAsync(String, Class) to execute in asynchronous thread
      * @throws NullPointerException if {@link SQLResultAdapter} is null

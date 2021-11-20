@@ -4,34 +4,71 @@ import com.jaoow.sql.connector.SQLConnector;
 import com.jaoow.sql.executor.adapter.ResultSetAdapter;
 import com.jaoow.sql.executor.adapter.SQLResultAdapter;
 import com.jaoow.sql.executor.result.SimpleResultSet;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.Executor;
 
+/**
+ * Class to build @{@link SQLExecutor}
+ */
 public class SQLExecutorBuilder {
 
-    private final SQLConnector connector;
-    private final Map<Class<?>, SQLResultAdapter<?>> adapters = new HashMap<>();
+    @NotNull private final SQLConnector connector;
+    @NotNull private final Map<Class<?>, SQLResultAdapter<?>> adapters = new HashMap<>();
 
-    private Executor executor;
+    @Nullable private Executor executor;
 
-    public SQLExecutorBuilder(SQLConnector connector) {
+    /**
+     * Create an instance of @{@link SQLExecutorBuilder}
+     *
+     * @param connector the @{@link SQLConnector}
+     */
+    public SQLExecutorBuilder(@NotNull SQLConnector connector) {
         this.connector = connector;
         this.adapters.put(SimpleResultSet.class, new ResultSetAdapter());
     }
 
-    public SQLExecutorBuilder setExecutor(Executor executor) {
+    /**
+     * Set the @{@link Executor} of asynchronous threads.
+     *
+     * @param executor the @{@link Executor}
+     *
+     * @return the @{@link SQLExecutorBuilder}
+     */
+
+    @NotNull
+    public SQLExecutorBuilder setExecutor(@Nullable Executor executor) {
         this.executor = executor;
         return this;
     }
 
-    public <T> SQLExecutorBuilder registerAdapter(Class<T> clazz, SQLResultAdapter<T> adapter) {
+    /**
+     * Register adapters to map queries.
+     *
+     * @param clazz the class of adapter
+     * @param adapter the @{@link SQLResultAdapter} of clazz
+     * @param <T> the type
+     *
+     * @return the @{@link SQLExecutorBuilder}
+     */
+
+    @NotNull
+    public <T> SQLExecutorBuilder registerAdapter(@NotNull Class<T> clazz, @NotNull SQLResultAdapter<T> adapter) {
         adapters.put(clazz, adapter);
         return this;
     }
 
+    /**
+     * Build @{@link SQLExecutor}
+     *
+     * @return the @{@link SQLExecutor}
+     */
+
+    @NotNull
     public SQLExecutor build() {
         Map<Class<?>, SQLResultAdapter<?>> immutable = Collections.unmodifiableMap(adapters);
         return executor == null ?
