@@ -236,7 +236,7 @@ public final class SQLExecutor {
     ) {
         SQLResultAdapter<T> adapter = getAdapter(clazz);
         if (adapter == null) {
-            throw new SQLAdapterNotFoundException("the adapter for class " + clazz.getSimpleName() + " was not found.");
+            throw new SQLAdapterNotFoundException(clazz);
         }
 
         return query(query, consumer, resultSet -> resultSet.next() ? adapter.adaptResult(resultSet) : null);
@@ -271,7 +271,7 @@ public final class SQLExecutor {
     public <T> Optional<T> query(@Language("MySQL") @NotNull String query, @NotNull Class<T> clazz) {
         SQLResultAdapter<T> adapter = getAdapter(clazz);
         if (adapter == null) {
-            throw new SQLAdapterNotFoundException("the adapter for class " + clazz.getSimpleName() + " was not found.");
+            throw new SQLAdapterNotFoundException(clazz);
         }
 
         return query(query, statement -> {}, resultSet -> resultSet.next() ? adapter.adaptResult(resultSet) : null);
@@ -314,7 +314,7 @@ public final class SQLExecutor {
     ) {
         SQLResultAdapter<T> adapter = getAdapter(clazz);
         if (adapter == null) {
-            throw new SQLAdapterNotFoundException("the adapter for class " + clazz.getSimpleName() + " was not found.");
+            throw new SQLAdapterNotFoundException(clazz);
         }
 
         return this.query(query, consumer, result -> {

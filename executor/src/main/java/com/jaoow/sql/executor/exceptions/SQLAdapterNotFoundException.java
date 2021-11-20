@@ -23,4 +23,12 @@ public class SQLAdapterNotFoundException extends SQLExecutorException {
         super(message);
     }
 
+    /**
+     * Create an exception with name of invalid class
+     * @param clazz the invalid class
+     */
+    public SQLAdapterNotFoundException(Class<?> clazz) {
+        super("the adapter for class " + clazz.getSimpleName() + " was not found.");
+    }
+
 }
