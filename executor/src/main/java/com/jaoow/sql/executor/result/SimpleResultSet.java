@@ -1,8 +1,10 @@
 package com.jaoow.sql.executor.result;
 
+import com.jaoow.sql.executor.exceptions.SQLExecutorException;
 import lombok.RequiredArgsConstructor;
 import org.jetbrains.annotations.NotNull;
 
+import java.io.FileNotFoundException;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Iterator;
@@ -22,7 +24,7 @@ public final class SimpleResultSet implements AutoCloseable {
             return (T) resultSet.getObject(column);
 
         } catch (SQLException e) {
-            throw new NullPointerException("\"" + column + "\" no has element (" + e.getMessage() + ").");
+            throw new SQLExecutorException("\"" + column + "\" no has element (" + e.getMessage() + ").");
         }
     }
 

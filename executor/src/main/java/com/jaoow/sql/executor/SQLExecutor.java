@@ -2,6 +2,7 @@ package com.jaoow.sql.executor;
 
 import com.jaoow.sql.connector.SQLConnector;
 import com.jaoow.sql.executor.adapter.SQLResultAdapter;
+import com.jaoow.sql.executor.exceptions.SQLAdapterNotFoundException;
 import com.jaoow.sql.executor.result.SimpleResultSet;
 import com.jaoow.sql.executor.statement.SimpleStatement;
 import lombok.AllArgsConstructor;
@@ -208,7 +209,7 @@ public final class SQLExecutor {
      *           
      * @return the completable future of optional query result
      * @see #query(String, Consumer, Class) to execute in synchronously
-     * @throws NullPointerException if {@link SQLResultAdapter} is null
+     * @throws SQLAdapterNotFoundException if {@link SQLResultAdapter} is null
      */
     public <T> CompletableFuture<Optional<T>> queryAsync(@Language("MySQL") @NotNull String query,
                                                          @NotNull Consumer<SimpleStatement> consumer,
@@ -227,14 +228,16 @@ public final class SQLExecutor {
      *              
      * @return The entity founded, or null
      * @see #queryAsync(String, Consumer, Class) to execute in asynchronous thread
-     * @throws NullPointerException if {@link SQLResultAdapter} is null
+     * @throws SQLAdapterNotFoundException if {@link SQLResultAdapter} is null
      */
     public <T> Optional<T> query(@Language("MySQL") @NotNull String query,
                                  @NotNull Consumer<SimpleStatement> consumer,
                                  @NotNull Class<T> clazz
     ) {
         SQLResultAdapter<T> adapter = getAdapter(clazz);
-        Objects.requireNonNull(adapter, "the adapter for class " + clazz.getSimpleName() + " was not found.");
+        if (adapter == null) {
+            throw new SQLAdapterNotFoundException("the adapter for class " + clazz.getSimpleName() + " was not found.");
+        }
 
         return query(query, consumer, resultSet -> resultSet.next() ? adapter.adaptResult(resultSet) : null);
     }
@@ -248,7 +251,7 @@ public final class SQLExecutor {
      *           
      * @return the completable future of optional query result
      * @see #query(String, Class) to execute in synchronously
-     * @throws NullPointerException if {@link SQLResultAdapter} is null
+     * @throws SQLAdapterNotFoundException if {@link SQLResultAdapter} is null
      */
     public <T> CompletableFuture<Optional<T>> queryAsync(@Language("MySQL") @NotNull String query, @NotNull Class<T> clazz) {
         return CompletableFuture.supplyAsync(() -> query(query, clazz), executor);
@@ -263,11 +266,13 @@ public final class SQLExecutor {
      *              
      * @return the entity founded, or null
      * @see #queryAsync(String, Class) to execute in asynchronous thread
-     * @throws NullPointerException if {@link SQLResultAdapter} is null
+     * @throws SQLAdapterNotFoundException if {@link SQLResultAdapter} is null
      */
     public <T> Optional<T> query(@Language("MySQL") @NotNull String query, @NotNull Class<T> clazz) {
         SQLResultAdapter<T> adapter = getAdapter(clazz);
-        Objects.requireNonNull(adapter, "the adapter for class " + clazz.getSimpleName() + " was not found.");
+        if (adapter == null) {
+            throw new SQLAdapterNotFoundException("the adapter for class " + clazz.getSimpleName() + " was not found.");
+        }
 
         return query(query, statement -> {}, resultSet -> resultSet.next() ? adapter.adaptResult(resultSet) : null);
     }
@@ -281,7 +286,7 @@ public final class SQLExecutor {
      * @param <T> the returned type
      *           
      * @return the completable future of @{@link Set} of result
-     * @throws NullPointerException if {@link SQLResultAdapter} is null
+     * @throws SQLAdapterNotFoundException if {@link SQLResultAdapter} is null
      * @see #queryMany(String, Consumer, Class) to execute in synchronously. 
      */
     public <T> CompletableFuture<Set<T>> queryManyAsync(@Language("MySQL") @NotNull String query,
@@ -301,14 +306,16 @@ public final class SQLExecutor {
      *              
      * @return The entities found
      * @see #queryManyAsync(String, Consumer, Class)  to execute in asynchronous thread
-     * @throws NullPointerException if {@link SQLResultAdapter} is null
+     * @throws SQLAdapterNotFoundException if {@link SQLResultAdapter} is null
      */
     public <T> Set<T> queryMany(@Language("MySQL") @NotNull String query, 
                                 @NotNull Consumer<SimpleStatement> consumer, 
                                 @NotNull Class<T> clazz
     ) {
         SQLResultAdapter<T> adapter = getAdapter(clazz);
-        Objects.requireNonNull(adapter, "the adapter for class " + clazz.getSimpleName() + " was not found.");
+        if (adapter == null) {
+            throw new SQLAdapterNotFoundException("the adapter for class " + clazz.getSimpleName() + " was not found.");
+        }
 
         return this.query(query, consumer, result -> {
 
@@ -334,7 +341,7 @@ public final class SQLExecutor {
      *
      * @return the completable future of @{@link Set} of result
      * @see #queryMany(String, Class) to execute in synchronously
-     * @throws NullPointerException if {@link SQLResultAdapter} is null
+     * @throws SQLAdapterNotFoundException if {@link SQLResultAdapter} is null
      */
     public <T> CompletableFuture<Set<T>> queryManyAsync(@Language("MySQL") @NotNull String query, @NotNull Class<T> clazz) {
         return CompletableFuture.supplyAsync(() -> queryMany(query, clazz), executor);
@@ -349,7 +356,7 @@ public final class SQLExecutor {
      *
      * @return The entities found
      * @see #queryManyAsync(String, Class) to execute in asynchronous thread
-     * @throws NullPointerException if {@link SQLResultAdapter} is null
+     * @throws SQLAdapterNotFoundException if {@link SQLResultAdapter} is null
      */
     public <T> Set<T> queryMany(@Language("MySQL") @NotNull String query, @NotNull Class<T> clazz) {
         return queryMany(query, statement -> {}, clazz);
