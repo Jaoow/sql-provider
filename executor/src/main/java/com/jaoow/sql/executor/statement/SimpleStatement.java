@@ -37,12 +37,13 @@ public final class SimpleStatement implements AutoCloseable {
     }
 
     public SimpleResultSet executeQuery() {
+
         try {
             return SimpleResultSet.of(preparedStatement.executeQuery());
         } catch (SQLException e) {
-            e.printStackTrace();
+            throw new NullPointerException("ResultSet cannot be null (" + e.getMessage() + ").");
         }
-        throw new NullPointerException("ResultSet can't be null.");
+
     }
 
     @Override

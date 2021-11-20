@@ -20,10 +20,10 @@ public final class SimpleResultSet implements AutoCloseable {
             }
 
             return (T) resultSet.getObject(column);
+
         } catch (SQLException e) {
-            e.printStackTrace();
+            throw new NullPointerException("\"" + column + "\" no has element (" + e.getMessage() + ").");
         }
-        throw new NullPointerException("\"" + column + "\" no has element");
     }
 
     public boolean next() {

@@ -20,7 +20,7 @@ import java.util.function.Consumer;
 import java.util.function.Function;
 
 /**
- * Class to execute database statments more easily
+ * Class to execute database statements more easily
  */
 @RequiredArgsConstructor @AllArgsConstructor
 public final class SQLExecutor {
