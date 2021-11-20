@@ -4,10 +4,8 @@ import com.jaoow.sql.executor.exceptions.SQLExecutorException;
 import lombok.RequiredArgsConstructor;
 import org.jetbrains.annotations.NotNull;
 
-import java.io.FileNotFoundException;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.Iterator;
 
 @SuppressWarnings("unchecked")
 @RequiredArgsConstructor(staticName = "of", onConstructor_ = {@NotNull})
