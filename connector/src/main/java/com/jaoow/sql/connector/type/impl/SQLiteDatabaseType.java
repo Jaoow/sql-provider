@@ -44,18 +44,13 @@ public final class SQLiteDatabaseType extends SQLDatabaseType {
 
         try {
             File parent = file.getParentFile();
-            if (!parent.exists()) {
-                if (!parent.mkdirs()) {
-                    throw new IOException("The database folder cannot be created.");
-                }
+            if (!parent.exists() && !parent.mkdirs()) {
+                throw new IOException("The database folder cannot be created.");
             }
 
-            if (!file.exists()) {
-                if (!file.createNewFile()) {
-                    throw new IOException("The database file cannot be created.");
-                }
+            if (!file.exists() && !file.createNewFile()) {
+                throw new IOException("The database file cannot be created.");
             }
-
         } catch (IOException e) {
             e.printStackTrace();
         }
