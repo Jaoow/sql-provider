@@ -27,6 +27,8 @@ import java.util.function.Function;
 @AllArgsConstructor
 public final class SQLExecutor {
 
+    private static final Consumer<SimpleStatement> EMPTY_STATEMENT = statement -> {};
+
     @NotNull private final SQLConnector sqlConnector;
     @NotNull private final Map<Class<?>, SQLResultAdapter<?>> adapterMap;
 
@@ -91,7 +93,6 @@ public final class SQLExecutor {
             try (SimpleStatement statement = SimpleStatement.of(connection.prepareStatement(sql))) {
                 consumer.accept(statement);
                 statement.execute();
-
             } catch (SQLException exception) {
                 exception.printStackTrace();
             }
@@ -116,7 +117,7 @@ public final class SQLExecutor {
      * @see #executeAsync(String) to execute statement in asynchronous thread
      */
     public void execute(@Language("MySQL") @NotNull String sql) {
-        executeAsync(sql, simpleStatement -> {});
+        executeAsync(sql, EMPTY_STATEMENT);
     }
 
     /**
@@ -190,7 +191,7 @@ public final class SQLExecutor {
      * @see #queryAsync(String, Function) to execute in asynchronous thread.
      */
     public <T> Optional<T> query(@Language("MySQL") @NotNull String query, @NotNull Function<SimpleResultSet, T> function) {
-        return query(query, statement -> {}, function);
+        return query(query, EMPTY_STATEMENT, function);
     }
 
     /**
@@ -264,7 +265,7 @@ public final class SQLExecutor {
             throw new SQLAdapterNotFoundException(clazz);
         }
 
-        return query(query, statement -> {}, resultSet -> resultSet.next() ? adapter.adaptResult(resultSet) : null);
+        return query(query, EMPTY_STATEMENT, resultSet -> resultSet.next() ? adapter.adaptResult(resultSet) : null);
     }
 
     /**
@@ -345,8 +346,7 @@ public final class SQLExecutor {
      * @see #queryManyAsync(String, Class) to execute in asynchronous thread
      */
     public <T> Set<T> queryMany(@Language("MySQL") @NotNull String query, @NotNull Class<T> clazz) {
-        return queryMany(query, statement -> {
-        }, clazz);
+        return queryMany(query, EMPTY_STATEMENT, clazz);
     }
 
 }
