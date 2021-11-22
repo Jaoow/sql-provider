@@ -2,6 +2,7 @@ package com.jaoow.sql.executor;
 
 import com.jaoow.sql.connector.SQLConnector;
 import com.jaoow.sql.executor.adapter.SQLResultAdapter;
+import com.jaoow.sql.executor.batch.BatchBuilder;
 import com.jaoow.sql.executor.exceptions.SQLAdapterNotFoundException;
 import com.jaoow.sql.executor.result.SimpleResultSet;
 import com.jaoow.sql.executor.statement.SimpleStatement;
@@ -349,4 +350,67 @@ public final class SQLExecutor {
         return queryMany(query, EMPTY_STATEMENT, clazz);
     }
 
+    /**
+     * Executes a batched database execution.
+     *
+     * <p>This will be executed on an asynchronous thread.</p>
+     *
+     * <p>Note that proper implementations of this method should determine
+     * if the provided {@link BatchBuilder} is actually worth of being a
+     * batched statement. For instance, a BatchBuilder with only one
+     * handler can safely be referred to {@link #executeAsync(String, Consumer)}</p>
+     *
+     * @param builder the builder to be used.
+     * @return a Promise of an asynchronous batched database execution
+     * @see #executeBatch(BatchBuilder) to perform this action synchronously
+     */
+    public CompletableFuture<Void> executeBatchAsync(@NotNull BatchBuilder builder) {
+        return CompletableFuture.runAsync(() -> this.executeBatch(builder));
+    }
+
+    /**
+     * Executes a batched database execution.
+     *
+     * <p>This will be executed on whichever thread it's called from.</p>
+     *
+     * <p>Note that proper implementations of this method should determine
+     * if the provided {@link BatchBuilder} is actually worth of being a
+     * batched statement. For instance, a BatchBuilder with only one
+     * handler can safely be referred to {@link #execute(String, Consumer)}</p>
+     *
+     * @param builder the builder to be used.
+     * @see #executeBatchAsync(BatchBuilder) to perform this action asynchronously
+     */
+    public void executeBatch(@NotNull BatchBuilder builder) {
+
+        if (builder.getHandlers().isEmpty()) return;
+        if (builder.getHandlers().size() == 1) {
+            this.execute(builder.getStatement(), builder.getHandlers().iterator().next());
+            return;
+        }
+
+        sqlConnector.execute(connection -> {
+            try (SimpleStatement statement = SimpleStatement.of(connection.prepareStatement(builder.getStatement()))) {
+
+                for (Consumer<SimpleStatement> handlers : builder.getHandlers()) {
+                    handlers.accept(statement);
+                    statement.addBatch();
+                }
+
+                statement.executeBatch();
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+        });
+    }
+
+    /**
+     * Gets a {@link BatchBuilder} for the provided statement.
+     *
+     * @param statement the statement to prepare for batching.
+     * @return a BatchBuilder
+     */
+    public BatchBuilder batch(@Language("MySQL") @NotNull String statement) {
+        return new BatchBuilder(statement, this);
+    }
 }

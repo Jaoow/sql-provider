@@ -37,6 +37,22 @@ public final class SimpleStatement implements AutoCloseable {
         }
     }
 
+    public void addBatch() {
+        try {
+            preparedStatement.addBatch();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public void executeBatch() {
+        try {
+            preparedStatement.executeBatch();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
     public SimpleResultSet executeQuery() {
         try {
             return SimpleResultSet.of(preparedStatement.executeQuery());
