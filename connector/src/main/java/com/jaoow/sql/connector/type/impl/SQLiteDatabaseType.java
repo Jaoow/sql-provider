@@ -24,7 +24,6 @@ public final class SQLiteDatabaseType extends SQLDatabaseType {
         this.file = file;
 
         SQLiteConfig config = new SQLiteConfig();
-        config.setJournalMode(SQLiteConfig.JournalMode.WAL);
         config.setSynchronous(SQLiteConfig.SynchronousMode.NORMAL);
         config.setTempStore(SQLiteConfig.TempStore.MEMORY);
         config.setPageSize(32768);
