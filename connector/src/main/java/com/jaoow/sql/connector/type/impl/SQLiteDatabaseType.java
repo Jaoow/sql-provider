@@ -27,7 +27,7 @@ public final class SQLiteDatabaseType extends SQLDatabaseType {
         config.setSynchronous(SQLiteConfig.SynchronousMode.NORMAL);
         config.setTempStore(SQLiteConfig.TempStore.MEMORY);
         config.setPageSize(32768);
-        config.setEncoding(SQLiteConfig.Encoding.UTF_8);
+        config.setEncoding(SQLiteConfig.Encoding.UTF8);
 
         source = new SQLiteDataSource(config);
         source.setUrl("jdbc:sqlite:" + file);
@@ -50,6 +50,7 @@ public final class SQLiteDatabaseType extends SQLDatabaseType {
             if (!file.exists() && !file.createNewFile()) {
                 throw new IOException("The database file cannot be created.");
             }
+
         } catch (IOException e) {
             e.printStackTrace();
         }
