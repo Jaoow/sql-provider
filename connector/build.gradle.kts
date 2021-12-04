@@ -3,7 +3,7 @@ repositories {
 }
 
 dependencies {
-    val hikariVersion = "3.4.5"
+    val hikariVersion = "4.0.3"
     val slf4jVersion = "1.7.32"
     val sqliteVersion = "3.36.0.2"
 
