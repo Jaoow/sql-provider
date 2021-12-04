@@ -27,11 +27,11 @@ public final class MySQLDatabaseType extends SQLDatabaseType {
     @Builder
     public MySQLDatabaseType(@NotNull String address, @NotNull String username, @NotNull String password, @NotNull String database) {
         super(
-                "com.mysql.cj.jdbc.Driver",
+                "com.mysql.jdbc.Driver",
                 "jdbc:mysql://" + address + "/" + database);
 
-        dataSource.setJdbcUrl(super.getJdbcUrl());
-        dataSource.setDriverClassName(super.getDriverClassName());
+        dataSource.setJdbcUrl(this.getJdbcUrl());
+        dataSource.setDriverClassName(this.getDriverClassName());
 
         dataSource.setUsername(username);
         dataSource.setPassword(password);
@@ -60,6 +60,14 @@ public final class MySQLDatabaseType extends SQLDatabaseType {
         dataSource.addDataSourceProperty("cacheCallableStmts", "true");
 
         dataSource.addDataSourceProperty("socketTimeout", String.valueOf(TimeUnit.SECONDS.toMillis(30)));
+    }
+
+    @Override
+    public String getDriverClassName() {
+        try {
+            return Class.forName("com.mysql.cj.jdbc.Driver").getName();
+        } catch (ClassNotFoundException ignored) {}
+        return "com.mysql.jdbc.Driver";
     }
 
     @Contract("_ -> this")
