@@ -27,7 +27,6 @@ public final class SQLiteDatabaseType extends SQLDatabaseType {
         config.setSynchronous(SQLiteConfig.SynchronousMode.NORMAL);
         config.setTempStore(SQLiteConfig.TempStore.MEMORY);
         config.setPageSize(32768);
-        config.setEncoding(SQLiteConfig.Encoding.UTF8);
 
         source = new SQLiteDataSource(config);
         source.setUrl("jdbc:sqlite:" + file);
