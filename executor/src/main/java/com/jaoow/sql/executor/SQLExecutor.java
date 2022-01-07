@@ -4,8 +4,10 @@ import com.jaoow.sql.connector.SQLConnector;
 import com.jaoow.sql.executor.adapter.SQLResultAdapter;
 import com.jaoow.sql.executor.batch.BatchBuilder;
 import com.jaoow.sql.executor.exceptions.SQLAdapterNotFoundException;
+import com.jaoow.sql.executor.dao.Dao;
 import com.jaoow.sql.executor.result.SimpleResultSet;
 import com.jaoow.sql.executor.statement.SimpleStatement;
+import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.RequiredArgsConstructor;
 import org.intellij.lang.annotations.Language;
@@ -24,8 +26,8 @@ import java.util.function.Function;
 /**
  * Class to execute database statements more easily
  */
-@RequiredArgsConstructor
-@AllArgsConstructor
+@AllArgsConstructor(access = AccessLevel.PROTECTED)
+@RequiredArgsConstructor(access = AccessLevel.PROTECTED)
 public final class SQLExecutor {
 
     private static final Consumer<SimpleStatement> EMPTY_STATEMENT = statement -> {};
@@ -361,7 +363,7 @@ public final class SQLExecutor {
      * handler can safely be referred to {@link #executeAsync(String, Consumer)}</p>
      *
      * @param builder the builder to be used.
-     * @return a Promise of an asynchronous batched database execution
+     * @return a future of an asynchronous batched database execution
      * @see #executeBatch(BatchBuilder) to perform this action synchronously
      */
     public CompletableFuture<Void> executeBatchAsync(@NotNull BatchBuilder builder) {
