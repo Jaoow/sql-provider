@@ -415,16 +415,4 @@ public final class SQLExecutor {
     public BatchBuilder batch(@Language("MySQL") @NotNull String statement) {
         return new BatchBuilder(statement, this);
     }
-
-    /**
-     * Gets a {@link Dao} for the provided class.
-     *
-     * @param table the table name for the dao.
-     * @param clazz the class of the dao.
-     * @param keyAdapter the key adapter to use.
-     * @return a Dao
-     */
-    public <K, V> Dao<K, V> dao(@NotNull String table, @NotNull Class<V> clazz, @NotNull Function<K, String> keyAdapter) {
-        return new Dao<>(table, clazz, keyAdapter, this);
-    }
 }
