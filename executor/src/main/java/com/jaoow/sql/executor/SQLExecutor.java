@@ -118,7 +118,7 @@ public final class SQLExecutor {
      * @see #executeAsync(String) to execute statement in asynchronous thread
      */
     public void execute(@Language("MySQL") @NotNull String sql) {
-        executeAsync(sql, EMPTY_STATEMENT);
+        execute(sql, EMPTY_STATEMENT);
     }
 
     /**
