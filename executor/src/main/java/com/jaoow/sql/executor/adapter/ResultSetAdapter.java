@@ -1,11 +1,11 @@
 package com.jaoow.sql.executor.adapter;
 
-import com.jaoow.sql.executor.result.SimpleResultSet;
+import java.sql.ResultSet;
 
-public class ResultSetAdapter implements SQLResultAdapter<SimpleResultSet> {
+public class ResultSetAdapter implements SQLResultAdapter<ResultSet> {
 
     @Override
-    public SimpleResultSet adaptResult(SimpleResultSet record) {
+    public ResultSet adaptResult(ResultSet record) {
         return record;
     }
 

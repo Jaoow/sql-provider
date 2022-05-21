@@ -3,10 +3,10 @@ package com.jaoow.sql.executor;
 import com.jaoow.sql.connector.SQLConnector;
 import com.jaoow.sql.executor.adapter.ResultSetAdapter;
 import com.jaoow.sql.executor.adapter.SQLResultAdapter;
-import com.jaoow.sql.executor.result.SimpleResultSet;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.sql.ResultSet;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
@@ -14,7 +14,9 @@ import java.util.concurrent.Executor;
 
 /**
  * Class to build @{@link SQLExecutor}
+ * @deprecated create a @{@link SQLExecutor} instance instead
  */
+@Deprecated
 public class SQLExecutorBuilder {
 
     @NotNull private final SQLConnector connector;
@@ -29,7 +31,7 @@ public class SQLExecutorBuilder {
      */
     public SQLExecutorBuilder(@NotNull SQLConnector connector) {
         this.connector = connector;
-        this.adapters.put(SimpleResultSet.class, new ResultSetAdapter());
+        this.adapters.put(ResultSet.class, new ResultSetAdapter());
     }
 
     /**

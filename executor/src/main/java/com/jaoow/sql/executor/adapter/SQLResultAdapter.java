@@ -1,10 +1,10 @@
 package com.jaoow.sql.executor.adapter;
 
-import com.jaoow.sql.executor.result.SimpleResultSet;
+import java.sql.ResultSet;
 
 @FunctionalInterface
 public interface SQLResultAdapter<T> {
 
-    T adaptResult(SimpleResultSet record);
+    T adaptResult(ResultSet record);
 
 }
