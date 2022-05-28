@@ -26,7 +26,8 @@ import java.util.function.Function;
 @AllArgsConstructor
 public final class SQLExecutor {
 
-    private static final Consumer<PreparedStatement> EMPTY_STATEMENT = statement -> {};
+    private static final Consumer<PreparedStatement> EMPTY_STATEMENT = statement -> {
+    };
 
     @NotNull
     private final SQLConnector sqlConnector;
@@ -229,14 +230,35 @@ public final class SQLExecutor {
     }
 
     /**
-     * Select a single entity from a given SQL query
+     * Execute a database query.
      *
-     * @param query the query to select the entity.
-     * @return the entity founded, or null
-     * @see #queryAsync(String, Class) to execute in asynchronous thread
+     * @param query the sql query
+     * @return the optional result of query
+     * @see #queryAsync(String) to execute in asynchronous thread.
      */
     public Optional<ResultSet> query(@Language("MySQL") @NotNull String query) {
-        return query(query, EMPTY_STATEMENT, resultSet -> resultSet);
+        return query(query, EMPTY_STATEMENT);
+    }
+
+    /**
+     * Select a single entity from a given SQL query
+     *
+     * @param query    the query to select the entity.
+     * @param consumer The statement consumer
+     * @return the entity founded, or null
+     * @see #queryAsync(String, Consumer) to execute in asynchronous thread
+     */
+    public Optional<ResultSet> query(@Language("MySQL") @NotNull String query, @NotNull Consumer<PreparedStatement> consumer) {
+        AtomicReference<Optional<ResultSet>> reference = new AtomicReference<>(Optional.empty());
+        sqlConnector.execute(connection -> {
+            try (PreparedStatement statement = connection.prepareStatement(query)) {
+                consumer.accept(statement);
+                reference.set(Optional.ofNullable(statement.executeQuery()));
+            } catch (SQLException exception) {
+                exception.printStackTrace();
+            }
+        });
+        return reference.get();
     }
 
     /**
@@ -288,6 +310,7 @@ public final class SQLExecutor {
         return CompletableFuture.supplyAsync(() -> query(query, consumer, clazz), executor);
     }
 
+
     /**
      * Execute a database query.
      *
@@ -310,6 +333,20 @@ public final class SQLExecutor {
      */
     public CompletableFuture<Optional<ResultSet>> queryAsync(@Language("MySQL") @NotNull String query) {
         return CompletableFuture.supplyAsync(() -> query(query), executor);
+    }
+
+    /**
+     * Execute a database query.
+     *
+     * @param query    the sql query
+     * @param consumer the @{@link ResultSet} to prepare query
+     * @return the completable future of optional query result
+     * @see #query(String, Consumer, Class) to execute in synchronously
+     */
+    public CompletableFuture<Optional<ResultSet>> queryAsync(@Language("MySQL") @NotNull String query,
+                                                             @NotNull Consumer<PreparedStatement> consumer
+    ) {
+        return CompletableFuture.supplyAsync(() -> query(query, consumer), executor);
     }
 
     /**
