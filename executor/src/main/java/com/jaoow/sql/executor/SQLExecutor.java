@@ -6,7 +6,6 @@ import com.jaoow.sql.executor.batch.BatchBuilder;
 import com.jaoow.sql.executor.function.ResultSetFunction;
 import com.jaoow.sql.executor.function.StatementConsumer;
 import lombok.AllArgsConstructor;
-import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import org.intellij.lang.annotations.Language;
 import org.jetbrains.annotations.Contract;
@@ -20,8 +19,6 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
 import java.util.concurrent.ForkJoinPool;
 import java.util.concurrent.atomic.AtomicReference;
-import java.util.function.Consumer;
-import java.util.function.Function;
 
 /**
  * Class to execute database statements more easily
