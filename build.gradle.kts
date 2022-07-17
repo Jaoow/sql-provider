@@ -13,6 +13,7 @@ subprojects {
 
     repositories {
         mavenCentral()
+        jcenter()
     }
 
     dependencies {
@@ -27,5 +28,6 @@ subprojects {
 
         testImplementation("org.xerial:sqlite-jdbc:3.36.0.2")
         testImplementation("mysql:mysql-connector-java:8.0.15")
+        testImplementation("org.mariadb.jdbc:mariadb-java-client:2.4.2")
     }
 }
