@@ -1,3 +1,5 @@
+import org.gradle.internal.impldep.org.junit.platform.engine.discovery.PackageNameFilter
+
 plugins {
     id("java")
     id("maven")
