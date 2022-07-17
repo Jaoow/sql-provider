@@ -25,6 +25,7 @@
 package com.jaoow.sql.executor.batch;
 
 import com.jaoow.sql.executor.SQLExecutor;
+import com.jaoow.sql.executor.function.StatementConsumer;
 import org.intellij.lang.annotations.Language;
 import org.jetbrains.annotations.NotNull;
 
@@ -38,7 +39,7 @@ public class BatchBuilder {
 
     @NotNull private final String statement;
     @NotNull private final SQLExecutor executor;
-    @NotNull private final List<Consumer<PreparedStatement>> handlers = new LinkedList<>();
+    @NotNull private final List<StatementConsumer> handlers = new LinkedList<>();
 
     public BatchBuilder(@Language("MySQL") @NotNull String statement, @NotNull SQLExecutor executor) {
         this.statement = statement;
@@ -61,7 +62,7 @@ public class BatchBuilder {
      * @return the handlers for this statement
      */
     @NotNull
-    public List<Consumer<PreparedStatement>> getHandlers() {
+    public List<StatementConsumer> getHandlers() {
         return this.handlers;
     }
 
@@ -82,7 +83,7 @@ public class BatchBuilder {
      * @param handler the statement handler
      * @return this builder
      */
-    public BatchBuilder batch(@NotNull Consumer<PreparedStatement> handler) {
+    public BatchBuilder batch(@NotNull StatementConsumer handler) {
         this.handlers.add(handler);
         return this;
     }
