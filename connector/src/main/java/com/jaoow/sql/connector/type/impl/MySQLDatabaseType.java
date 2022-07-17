@@ -12,7 +12,7 @@ import java.sql.SQLException;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 
-public final class MySQLDatabaseType extends SQLDatabaseType {
+public class MySQLDatabaseType extends SQLDatabaseType {
 
     private final HikariDataSource dataSource = new HikariDataSource();
 
@@ -26,11 +26,9 @@ public final class MySQLDatabaseType extends SQLDatabaseType {
 
     @Builder
     public MySQLDatabaseType(@NotNull String address, @NotNull String username, @NotNull String password, @NotNull String database) {
-        super(
-                "com.mysql.jdbc.Driver",
-                "jdbc:mysql://" + address + "/" + database);
+        super("com.mysql.jdbc.Driver", "jdbc:mysql://%s/%s");
 
-        dataSource.setJdbcUrl(this.getJdbcUrl());
+        dataSource.setJdbcUrl(String.format(this.getJdbcUrl(), address, database));
         dataSource.setDriverClassName(this.getDriverClassName());
 
         dataSource.setUsername(username);
@@ -66,8 +64,9 @@ public final class MySQLDatabaseType extends SQLDatabaseType {
     public String getDriverClassName() {
         try {
             return Class.forName("com.mysql.cj.jdbc.Driver").getName();
-        } catch (ClassNotFoundException ignored) {}
-        return "com.mysql.jdbc.Driver";
+        } catch (ClassNotFoundException exception) {
+            return "com.mysql.jdbc.Driver";
+        }
     }
 
     @Contract("_ -> this")
