@@ -119,6 +119,7 @@ public final class SQLExecutor {
             try (PreparedStatement statement = connection.prepareStatement(sql)) {
                 consumer.accept(statement);
                 statement.execute();
+
             } catch (SQLException exception) {
                 exception.printStackTrace();
             }
@@ -133,7 +134,8 @@ public final class SQLExecutor {
      *
      * @see #execute(String) to execute statment in synchronously.
      */
-    public CompletableFuture<Void> executeAsync(@Language("MySQL") @NotNull String sql) {
+    @Contract("_ -> new")
+    public @NotNull CompletableFuture<Void> executeAsync(@Language("MySQL") @NotNull String sql) {
         return CompletableFuture.runAsync(() -> execute(sql), executor);
     }
 
@@ -282,9 +284,10 @@ public final class SQLExecutor {
      *
      * @see #query(String, StatementConsumer, ResultSetFunction)  to execute in synchronously
      */
-    public <T> CompletableFuture<Optional<T>> queryAsync(@Language("MySQL") @NotNull String query,
-                                                         @NotNull StatementConsumer consumer,
-                                                         @NotNull ResultSetFunction<T> function
+    @Contract("_, _, _ -> new")
+    public <T> @NotNull CompletableFuture<Optional<T>> queryAsync(@Language("MySQL") @NotNull String query,
+                                                                  @NotNull StatementConsumer consumer,
+                                                                  @NotNull ResultSetFunction<T> function
     ) {
         return CompletableFuture.supplyAsync(() -> query(query, consumer, function), executor);
     }
@@ -299,8 +302,9 @@ public final class SQLExecutor {
      *
      * @see #query(String, ResultSetFunction) to execute in synchronously
      */
-    public <T> CompletableFuture<Optional<T>> queryAsync(@Language("MySQL") @NotNull String query,
-                                                         @NotNull ResultSetFunction<T> function
+    @Contract("_, _ -> new")
+    public <T> @NotNull CompletableFuture<Optional<T>> queryAsync(@Language("MySQL") @NotNull String query,
+                                                                  @NotNull ResultSetFunction<T> function
     ) {
         return CompletableFuture.supplyAsync(() -> query(query, function), executor);
     }
@@ -315,9 +319,10 @@ public final class SQLExecutor {
      * @return the completable future of optional query result
      * @see #query(String, StatementConsumer, Class) to execute in synchronously
      */
-    public <T> CompletableFuture<Optional<T>> queryAsync(@Language("MySQL") @NotNull String query,
-                                                         @NotNull StatementConsumer consumer,
-                                                         @NotNull Class<T> clazz
+    @Contract("_, _, _ -> new")
+    public <T> @NotNull CompletableFuture<Optional<T>> queryAsync(@Language("MySQL") @NotNull String query,
+                                                                  @NotNull StatementConsumer consumer,
+                                                                  @NotNull Class<T> clazz
     ) {
         return CompletableFuture.supplyAsync(() -> query(query, consumer, clazz), executor);
     }
@@ -333,7 +338,8 @@ public final class SQLExecutor {
      *
      * @see #query(String, Class) to execute in synchronously
      */
-    public <T> CompletableFuture<Optional<T>> queryAsync(@Language("MySQL") @NotNull String query, @NotNull Class<T> clazz) {
+    @Contract("_, _ -> new")
+    public <T> @NotNull CompletableFuture<Optional<T>> queryAsync(@Language("MySQL") @NotNull String query, @NotNull Class<T> clazz) {
         return CompletableFuture.supplyAsync(() -> query(query, clazz), executor);
     }
 
@@ -345,7 +351,8 @@ public final class SQLExecutor {
      *
      * @see #query(String, Class) to execute in synchronously
      */
-    public CompletableFuture<Optional<ResultSet>> queryAsync(@Language("MySQL") @NotNull String query) {
+    @Contract("_ -> new")
+    public @NotNull CompletableFuture<Optional<ResultSet>> queryAsync(@Language("MySQL") @NotNull String query) {
         return CompletableFuture.supplyAsync(() -> query(query), executor);
     }
 
@@ -358,8 +365,9 @@ public final class SQLExecutor {
      *
      * @see #query(String, StatementConsumer) to execute in synchronously
      */
-    public CompletableFuture<Optional<ResultSet>> queryAsync(@Language("MySQL") @NotNull String query,
-                                                             @NotNull StatementConsumer consumer
+    @Contract("_, _ -> new")
+    public @NotNull CompletableFuture<Optional<ResultSet>> queryAsync(@Language("MySQL") @NotNull String query,
+                                                                      @NotNull StatementConsumer consumer
     ) {
         return CompletableFuture.supplyAsync(() -> query(query, consumer), executor);
     }
@@ -507,7 +515,8 @@ public final class SQLExecutor {
      * @param statement the statement to prepare for batching.
      * @return a BatchBuilder
      */
-    public BatchBuilder batch(@Language("MySQL") @NotNull String statement) {
+    @Contract("_ -> new")
+    public @NotNull BatchBuilder batch(@Language("MySQL") @NotNull String statement) {
         return new BatchBuilder(statement, this);
     }
 }
