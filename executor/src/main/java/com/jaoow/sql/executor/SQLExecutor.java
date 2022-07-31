@@ -383,9 +383,10 @@ public final class SQLExecutor {
      *
      * @see #queryMany(String, StatementConsumer, Class) to execute in synchronously.
      */
-    public <T> CompletableFuture<Set<T>> queryManyAsync(@Language("MySQL") @NotNull String query,
-                                                        @NotNull StatementConsumer consumer,
-                                                        @NotNull Class<T> clazz) {
+    @Contract("_, _, _ -> new")
+    public <T> @NotNull CompletableFuture<Set<T>> queryManyAsync(@Language("MySQL") @NotNull String query,
+                                                                 @NotNull StatementConsumer consumer,
+                                                                 @NotNull Class<T> clazz) {
 
         return CompletableFuture.supplyAsync(() -> queryMany(query, consumer, clazz), executor);
     }
@@ -437,7 +438,8 @@ public final class SQLExecutor {
      *
      * @see #queryMany(String, Class) to execute in synchronously
      */
-    public <T> CompletableFuture<Set<T>> queryManyAsync(@Language("MySQL") @NotNull String query, @NotNull Class<T> clazz) {
+    @Contract("_, _ -> new")
+    public <T> @NotNull CompletableFuture<Set<T>> queryManyAsync(@Language("MySQL") @NotNull String query, @NotNull Class<T> clazz) {
         return CompletableFuture.supplyAsync(() -> queryMany(query, clazz), executor);
     }
 
@@ -469,7 +471,8 @@ public final class SQLExecutor {
      * @return a Promise of an asynchronous batched database execution
      * @see #executeBatch(BatchBuilder) to perform this action synchronously
      */
-    public CompletableFuture<Void> executeBatchAsync(@NotNull BatchBuilder builder) {
+    @Contract("_ -> new")
+    public @NotNull CompletableFuture<Void> executeBatchAsync(@NotNull BatchBuilder builder) {
         return CompletableFuture.runAsync(() -> this.executeBatch(builder));
     }
 
