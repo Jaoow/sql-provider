@@ -91,22 +91,6 @@ public final class SQLExecutor {
     }
 
     /**
-     * Execute a database statement in asynchronous thread
-     *
-     * @param sql      the sql statement
-     * @param consumer the @{@link PreparedStatement} to prepare statement
-     * @return the completable future of execution
-     *
-     * @see #execute(String, StatementConsumer) to execute statement in synchronously
-     */
-    @Contract("_, _ -> new")
-    public @NotNull CompletableFuture<Void> executeAsync(@Language("MySQL") @NotNull String sql,
-                                                         @NotNull StatementConsumer consumer) {
-
-        return CompletableFuture.runAsync(() -> execute(sql, consumer), executor);
-    }
-
-    /**
      * Execute a database statement.
      *
      * @param sql      the sql statement
@@ -127,6 +111,32 @@ public final class SQLExecutor {
     }
 
     /**
+     * Execute a database statement.
+     *
+     * @param sql the sql statement
+     * @see #executeAsync(String) to execute statement in asynchronous thread
+     */
+    public void execute(@Language("MySQL") @NotNull String sql) {
+        execute(sql, EMPTY_STATEMENT);
+    }
+
+    /**
+     * Execute a database statement in asynchronous thread
+     *
+     * @param sql      the sql statement
+     * @param consumer the @{@link PreparedStatement} to prepare statement
+     * @return the completable future of execution
+     *
+     * @see #execute(String, StatementConsumer) to execute statement in synchronously
+     */
+    @Contract("_, _ -> new")
+    public @NotNull CompletableFuture<Void> executeAsync(@Language("MySQL") @NotNull String sql,
+                                                         @NotNull StatementConsumer consumer) {
+
+        return CompletableFuture.runAsync(() -> execute(sql, consumer), executor);
+    }
+
+    /**
      * Execute a database statement in asynchronous thread
      *
      * @param sql the sql statement
@@ -137,16 +147,6 @@ public final class SQLExecutor {
     @Contract("_ -> new")
     public @NotNull CompletableFuture<Void> executeAsync(@Language("MySQL") @NotNull String sql) {
         return CompletableFuture.runAsync(() -> execute(sql), executor);
-    }
-
-    /**
-     * Execute a database statement.
-     *
-     * @param sql the sql statement
-     * @see #executeAsync(String) to execute statement in asynchronous thread
-     */
-    public void execute(@Language("MySQL") @NotNull String sql) {
-        execute(sql, EMPTY_STATEMENT);
     }
 
     /**
