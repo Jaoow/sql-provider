@@ -23,23 +23,22 @@ import java.util.concurrent.ForkJoinPool;
 import java.util.concurrent.atomic.AtomicReference;
 
 /**
- * Class to execute database statements more easily
+ * Class to execute database statements more easily.
  */
 @RequiredArgsConstructor
 @AllArgsConstructor
 public final class SQLExecutor {
 
     private static final StatementConsumer EMPTY_STATEMENT = statement -> {};
-    private static final ResultSetConsumer EMPTY_RESULT = resultSet -> {};
 
     @NotNull private final SQLConnector sqlConnector;
     @NotNull private final Map<Class<?>, SQLResultAdapter<?>> adapters;
     @NotNull private Executor executor = ForkJoinPool.commonPool();
 
     /**
-     * Create an instance of @{@link SQLExecutor}
+     * Create an instance of @{@link SQLExecutor}.
      *
-     * @param connector the @{@link SQLConnector}
+     * @param connector the @{@link SQLConnector}.
      */
     public SQLExecutor(@NotNull SQLConnector connector) {
         this.sqlConnector = connector;
@@ -47,20 +46,21 @@ public final class SQLExecutor {
     }
 
     /**
-     * Set the executor to perform asynchronous statements
+     * Set the executor to perform asynchronous statements.
      *
-     * @param executor tbe @{@link Executor}
+     * @param executor  tbe @{@link Executor}.
      */
     public void setExecutor(@NotNull Executor executor) {
         this.executor = executor;
     }
 
     /**
-     * Get the registered @{@link SQLResultAdapter}
+     * Get the registered @{@link SQLResultAdapter}.
      *
-     * @param clazz the type of class of adapter
-     * @param <T>   the returned type
-     * @return the @{@link SQLResultAdapter}
+     * @param clazz     the type of class of adapter.
+     * @param <T>       the returned type.
+     *
+     * @return the @{@link SQLResultAdapter}.
      */
     @NotNull
     @SuppressWarnings("unchecked")
@@ -76,10 +76,11 @@ public final class SQLExecutor {
     /**
      * Register adapters to map queries.
      *
-     * @param clazz   the class of adapter
-     * @param adapter the @{@link SQLResultAdapter} of clazz
-     * @param <T>     the type
-     * @return the @{@link SQLExecutor}
+     * @param clazz     the class of adapter.
+     * @param adapter   the @{@link SQLResultAdapter} of clazz.
+     * @param <T>       the type.
+     *
+     * @return the @{@link SQLExecutor}.
      */
     @NotNull
     public <T> SQLExecutor registerAdapter(@NotNull Class<T> clazz, @NotNull SQLResultAdapter<T> adapter) {
@@ -90,8 +91,8 @@ public final class SQLExecutor {
     /**
      * Execute a database statement.
      *
-     * @param sql the sql statement
-     * @see #executeAsync(String) to execute statement in asynchronous thread
+     * @param sql       the sql statement.
+     * @see #executeAsync(String) to execute statement in asynchronous thread.
      */
     public void execute(@Language("MySQL") @NotNull String sql) {
         execute(sql, EMPTY_STATEMENT);
@@ -100,20 +101,22 @@ public final class SQLExecutor {
     /**
      * Execute a database statement.
      *
-     * @param sql      the sql statement
-     * @param consumer the @{@link PreparedStatement} to prepare statement
+     * @param sql       the sql statement.
+     * @param prepare   the @{@link PreparedStatement} to prepare statement.
      *
-     * @see #executeAsync(String, StatementConsumer) to execute statement in asynchronous thread
+     * @see #executeAsync(String, StatementConsumer) to execute statement in asynchronous thread.
      */
-    public void execute(@Language("MySQL") @NotNull String sql, @NotNull StatementConsumer consumer) {
-        execute(sql, Statement.NO_GENERATED_KEYS, consumer, EMPTY_STATEMENT);
+    public void execute(@Language("MySQL") @NotNull String sql, @NotNull StatementConsumer prepare) {
+        execute(sql, Statement.NO_GENERATED_KEYS, prepare, EMPTY_STATEMENT);
     }
 
     /**
      * Execute a database statement and retrieve its result.
      *
-     * @param sql       The sql statement
+     * @param sql       The sql statement.
      * @param result    The @{@link ResultSetConsumer} to accept result.
+     *
+     * @see #executeAsync(String, ResultSetConsumer) to execute statement in asynchronous thread.
      */
     public void execute(@Language("MySQL") @NotNull String sql, @NotNull ResultSetConsumer result) {
         execute(sql, EMPTY_STATEMENT, result);
@@ -125,6 +128,8 @@ public final class SQLExecutor {
      * @param sql       The sql statement.
      * @param prepare   The @{@link PreparedStatement} to prepare statement.
      * @param result    The @{@link ResultSetConsumer} to accept result.
+     *
+     * @see #executeAsync(String, StatementConsumer, ResultSetConsumer) to execute statement in asynchronous thread.
      */
     public void execute(@Language("MySQL") @NotNull String sql, @NotNull StatementConsumer prepare, @NotNull ResultSetConsumer result) {
         execute(sql, Statement.RETURN_GENERATED_KEYS, prepare, statement -> {
@@ -141,6 +146,8 @@ public final class SQLExecutor {
      * @param autoGeneratedKeys     The flag to indicate if auto generated keys should be retrieved.
      * @param prepare               The @{@link PreparedStatement} to prepare statement.
      * @param result                The @{@link ResultSetConsumer} to accept result.
+     *
+     * @see #executeAsync(String, int, StatementConsumer, StatementConsumer) to execute statement in asynchronous thread.
      */
     public void execute(@Language("MySQL") @NotNull String sql, int autoGeneratedKeys,
                         @NotNull StatementConsumer prepare,
@@ -159,11 +166,11 @@ public final class SQLExecutor {
     }
 
     /**
-     * Execute a database statement in asynchronous thread
+     * Execute a database statement in asynchronous thread.
      *
-     * @param sql   the sql statement
+     * @param sql   the sql statement.
      *
-     * @return the completable future
+     * @return the completable future.
      * @see #execute(String) to execute statment in synchronously.
      */
     @Contract("_ -> new")
@@ -172,29 +179,27 @@ public final class SQLExecutor {
     }
 
     /**
-     * Execute a database statement in asynchronous thread
+     * Execute a database statement in asynchronous thread.
      *
-     * @param sql      the sql statement
-     * @param consumer the @{@link PreparedStatement} to prepare statement
+     * @param sql      the sql statement.
+     * @param consumer the @{@link PreparedStatement} to prepare statement.
      *
-     * @return the completable future of execution
-     * @see #execute(String, StatementConsumer) to execute statement in synchronously
+     * @return the completable future of execution.
+     * @see #execute(String, StatementConsumer) to execute statement in synchronously.
      */
     @Contract("_, _ -> new")
-    public @NotNull CompletableFuture<Void> executeAsync(@Language("MySQL") @NotNull String sql,
-                                                         @NotNull StatementConsumer consumer) {
-
+    public @NotNull CompletableFuture<Void> executeAsync(@Language("MySQL") @NotNull String sql, @NotNull StatementConsumer consumer) {
         return CompletableFuture.runAsync(() -> execute(sql, consumer), executor);
     }
 
     /**
-     * Execute a database statement and retrieve its result in an asynchronous thread
+     * Execute a database statement and retrieve its result in an asynchronous thread.
      *
-     * @param sql       The sql statement
+     * @param sql       The sql statement.
      * @param result    The @{@link ResultSetConsumer} to accept result.
      *
-     * @return the completable future of execution
-     * @see #execute(String, ResultSetConsumer) to execute statement in synchronously
+     * @return the completable future of execution.
+     * @see #execute(String, ResultSetConsumer) to execute statement in synchronously.
      */
     public @NotNull CompletableFuture<Void> executeAsync(@Language("MySQL") @NotNull String sql, @NotNull ResultSetConsumer result) {
         return CompletableFuture.runAsync(() -> execute(sql, result), executor);
@@ -207,8 +212,8 @@ public final class SQLExecutor {
      * @param prepare   The @{@link PreparedStatement} to prepare statement.
      * @param result    The @{@link ResultSetConsumer} to accept result.
      *
-     * @return the completable future of execution
-     * @see #execute(String, StatementConsumer, ResultSetConsumer) to execute statement in synchronously
+     * @return the completable future of execution.
+     * @see #execute(String, StatementConsumer, ResultSetConsumer) to execute statement in synchronously.
      */
     public @NotNull CompletableFuture<Void> executeAsync(@Language("MySQL") @NotNull String sql,
                                                          @NotNull StatementConsumer prepare,
@@ -226,7 +231,7 @@ public final class SQLExecutor {
      * @param result                The @{@link ResultSetConsumer} to accept result.
      *
      * @return the completable future of execution
-     * @see #execute(String, int, StatementConsumer, StatementConsumer) to execute statement in synchronously
+     * @see #execute(String, int, StatementConsumer, StatementConsumer) to execute statement in synchronously.
      */
     public @NotNull CompletableFuture<Void> executeAsync(@Language("MySQL") @NotNull String sql,
                                                          int autoGeneratedKeys,
@@ -245,7 +250,7 @@ public final class SQLExecutor {
      * @param <T>      the returned type
      * @return the optional result of query
      *
-     * @see #queryAsync(String, StatementConsumer, ResultSetFunction) to query in asynchronous thread.
+     * @see #queryAsync(String, StatementConsumer, ResultSetFunction) to query in asynchronous.
      */
     public <T> Optional<T> query(@Language("MySQL") @NotNull String query,
                                  @NotNull StatementConsumer consumer,
@@ -544,23 +549,16 @@ public final class SQLExecutor {
         return queryMany(query, EMPTY_STATEMENT, clazz);
     }
 
+
     /**
-     * Executes a batched database execution.
+     * Gets a {@link BatchBuilder} for the provided statement.
      *
-     * <p>This will be executed on an asynchronous thread.</p>
-     *
-     * <p>Note that proper implementations of this method should determine
-     * if the provided {@link BatchBuilder} is actually worth of being a
-     * batched statement. For instance, a BatchBuilder with only one
-     * handler can safely be referred to {@link #executeAsync(String, StatementConsumer)}</p>
-     *
-     * @param builder the builder to be used.
-     * @return a Promise of an asynchronous batched database execution
-     * @see #executeBatch(BatchBuilder) to perform this action synchronously
+     * @param statement the statement to prepare for batching.
+     * @return a BatchBuilder
      */
     @Contract("_ -> new")
-    public @NotNull CompletableFuture<Void> executeBatchAsync(@NotNull BatchBuilder builder) {
-        return CompletableFuture.runAsync(() -> this.executeBatch(builder));
+    public @NotNull BatchBuilder batch(@Language("MySQL") @NotNull String statement) {
+        return new BatchBuilder(statement, this);
     }
 
     /**
@@ -575,23 +573,67 @@ public final class SQLExecutor {
      *
      * @param builder the builder to be used.
      *
-     * @see #executeBatchAsync(BatchBuilder) to perform this action asynchronously
+     * @see #executeBatchAsync(BatchBuilder) to perform this action asynchronously.
      */
     public void executeBatch(@NotNull BatchBuilder builder) {
+        executeBatch(builder, Statement.NO_GENERATED_KEYS, EMPTY_STATEMENT);
+    }
+
+    /**
+     * Executes a batched database execution and retrieve statement.
+     *
+     * <p>This will be executed on whichever thread it's called from.</p>
+     *
+     * <p>Note that proper implementations of this method should determine
+     * if the provided {@link BatchBuilder} is actually worth of being a
+     * batched statement. For instance, a BatchBuilder with only one
+     * handler can safely be referred to {@link #execute(String, StatementConsumer)}</p>
+     *
+     * @param builder   The builder to be used.
+     * @param result    The result to be accepted.
+     *
+     * @see #executeBatchAsync(BatchBuilder, ResultSetConsumer) to perform this action asynchronously.
+     */
+    public void executeBatch(@NotNull BatchBuilder builder, ResultSetConsumer result) {
+        executeBatch(builder, Statement.RETURN_GENERATED_KEYS, statement -> {
+            try (ResultSet set = statement.getGeneratedKeys()) {
+                result.accept(set);
+            }
+        });
+    }
+
+    /**
+     * Executes a batched database execution and retrieve statement.
+     *
+     * <p>This will be executed on whichever thread it's called from.</p>
+     *
+     * <p>Note that proper implementations of this method should determine
+     * if the provided {@link BatchBuilder} is actually worth of being a
+     * batched statement. For instance, a BatchBuilder with only one
+     * handler can safely be referred to {@link #execute(String, StatementConsumer)}</p>
+     *
+     * @param builder               The builder to be used.
+     * @param autoGeneratedKeys     The flag to indicate if auto generated keys should be retrieved.
+     * @param result                The result to be accepted.
+     *
+     * @see #executeBatchAsync(BatchBuilder, int, StatementConsumer) to perform this action asynchronously.
+     */
+    public void executeBatch(@NotNull BatchBuilder builder, int autoGeneratedKeys, @NotNull StatementConsumer result) {
         if (builder.getHandlers().isEmpty()) return;
         if (builder.getHandlers().size() == 1) {
-            this.execute(builder.getStatement(), builder.getHandlers().iterator().next());
+            this.execute(builder.getStatement(), autoGeneratedKeys, builder.getHandlers().iterator().next(), result);
             return;
         }
 
         sqlConnector.execute(connection -> {
-            try (PreparedStatement statement = connection.prepareStatement(builder.getStatement())) {
+            try (PreparedStatement statement = connection.prepareStatement(builder.getStatement(), autoGeneratedKeys)) {
                 for (StatementConsumer handlers : builder.getHandlers()) {
                     handlers.accept(statement);
                     statement.addBatch();
                 }
 
                 statement.executeBatch();
+                result.accept(statement);
 
             } catch (SQLException e) {
                 e.printStackTrace();
@@ -600,13 +642,65 @@ public final class SQLExecutor {
     }
 
     /**
-     * Gets a {@link BatchBuilder} for the provided statement.
+     * Executes a batched database execution.
      *
-     * @param statement the statement to prepare for batching.
-     * @return a BatchBuilder
+     * <p>This will be executed on an asynchronous thread.</p>
+     *
+     * <p>Note that proper implementations of this method should determine
+     * if the provided {@link BatchBuilder} is actually worth of being a
+     * batched statement. For instance, a BatchBuilder with only one
+     * handler can safely be referred to {@link #executeAsync(String, StatementConsumer)}</p>
+     *
+     * @param builder the builder to be used.
+     * @return a Promise of an asynchronous batched database execution
+     *
+     * @see #executeBatch(BatchBuilder) to perform this action synchronously
      */
     @Contract("_ -> new")
-    public @NotNull BatchBuilder batch(@Language("MySQL") @NotNull String statement) {
-        return new BatchBuilder(statement, this);
+    public @NotNull CompletableFuture<Void> executeBatchAsync(@NotNull BatchBuilder builder) {
+        return CompletableFuture.runAsync(() -> this.executeBatch(builder));
     }
+
+    /**
+     * Executes a batched database execution and retrieve statement.
+     *
+     * <p>This will be executed on an asynchronous thread.</p>
+     *
+     * <p>Note that proper implementations of this method should determine
+     * if the provided {@link BatchBuilder} is actually worth of being a
+     * batched statement. For instance, a BatchBuilder with only one
+     * handler can safely be referred to {@link #executeAsync(String, StatementConsumer, ResultSetConsumer)}</p>
+     *
+     * @param builder   The builder to be used.
+     * @param result    The result to be accepted.
+     *
+     * @return a Promise of an asynchronous batched database execution
+     * @see #executeBatch(BatchBuilder, ResultSetConsumer) to perform this action synchronously
+     */
+    @Contract("_,_ -> new")
+    public @NotNull CompletableFuture<Void> executeBatchAsync(@NotNull BatchBuilder builder, @NotNull ResultSetConsumer result) {
+        return CompletableFuture.runAsync(() -> this.executeBatch(builder, result));
+    }
+    /**
+     * Executes a batched database execution and retrieve statement.
+     *
+     * <p>This will be executed on an asynchronous thread.</p>
+     *
+     * <p>Note that proper implementations of this method should determine
+     * if the provided {@link BatchBuilder} is actually worth of being a
+     * batched statement. For instance, a BatchBuilder with only one
+     * handler can safely be referred to {@link #executeAsync(String, int, StatementConsumer, StatementConsumer)}</p>
+     *
+     * @param builder               The builder to be used.
+     * @param autoGeneratedKeys     The flag to indicate if auto generated keys should be retrieved.
+     * @param result                The result to be accepted.
+     *
+     * @return a Promise of an asynchronous batched database execution
+     * @see #executeBatch(BatchBuilder, int, StatementConsumer) to perform this action synchronously
+     */
+    @Contract("_,_,_ -> new")
+    public @NotNull CompletableFuture<Void> executeBatchAsync(@NotNull BatchBuilder builder, int autoGeneratedKeys, @NotNull StatementConsumer result) {
+        return CompletableFuture.runAsync(() -> this.executeBatch(builder, autoGeneratedKeys, result));
+    }
+
 }
