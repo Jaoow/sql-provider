@@ -160,7 +160,7 @@ public final class SQLExecutor {
                 result.accept(statement);
 
             } catch (SQLException exception) {
-                exception.printStackTrace();
+                throw new RuntimeException(exception);
             }
         });
     }
@@ -265,7 +265,7 @@ public final class SQLExecutor {
                 }
 
             } catch (SQLException exception) {
-                exception.printStackTrace();
+                throw new RuntimeException(exception);
             }
         });
 
@@ -300,9 +300,8 @@ public final class SQLExecutor {
             try {
                 return resultSet.next() ? getAdapter(clazz).adaptResult(resultSet) : null;
             } catch (SQLException e) {
-                e.printStackTrace();
+                throw new RuntimeException(e);
             }
-            return null;
         });
     }
 
@@ -325,9 +324,8 @@ public final class SQLExecutor {
             try {
                 return resultSet.next() ? getAdapter(clazz).adaptResult(resultSet) : null;
             } catch (SQLException e) {
-                e.printStackTrace();
+                throw new RuntimeException(e);
             }
-            return null;
         });
     }
 
@@ -359,7 +357,7 @@ public final class SQLExecutor {
                 consumer.accept(statement);
                 reference.set(Optional.ofNullable(statement.executeQuery()));
             } catch (SQLException exception) {
-                exception.printStackTrace();
+                throw new RuntimeException(exception);
             }
         });
         return reference.get();
@@ -511,7 +509,7 @@ public final class SQLExecutor {
                         elements.add(value);
                     }
                 } catch (SQLException e) {
-                    e.printStackTrace();
+                    throw new RuntimeException(e);
                 }
             }
 
@@ -636,7 +634,7 @@ public final class SQLExecutor {
                 result.accept(statement);
 
             } catch (SQLException e) {
-                e.printStackTrace();
+                throw new RuntimeException(e);
             }
         });
     }
