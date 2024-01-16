@@ -66,9 +66,9 @@ public final class SQLiteDatabaseType extends SQLDatabaseType {
 
         return consumer -> {
             try (Connection connection = source.getConnection()) {
-                consumer.accept(connection);
+                consumer.execute(connection);
             } catch (SQLException exception) {
-                exception.printStackTrace();
+                throw new RuntimeException(exception);
             }
         };
     }
