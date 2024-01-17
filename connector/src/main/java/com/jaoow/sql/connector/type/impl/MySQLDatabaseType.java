@@ -85,8 +85,8 @@ public class MySQLDatabaseType extends SQLDatabaseType {
         return consumer -> {
             try (Connection connection = dataSource.getConnection()) {
                 consumer.execute(connection);
-            } catch (SQLException e) {
-                throw new RuntimeException(e);
+            } catch (SQLException exception) {
+                throw new SQLException(exception);
             }
         };
     }

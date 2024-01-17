@@ -650,6 +650,7 @@ public final class SQLExecutor {
     public @NotNull CompletableFuture<Void> executeBatchAsync(@NotNull BatchBuilder builder, @NotNull ResultSetConsumer result) {
         return CompletableFuture.runAsync(() -> this.executeBatch(builder, result));
     }
+
     /**
      * Executes a batched database execution and retrieve statement.
      *

@@ -41,7 +41,6 @@ public class SQLExecutorBuilder {
      * @param executor the @{@link Executor}
      * @return the @{@link SQLExecutorBuilder}
      */
-
     @NotNull
     public SQLExecutorBuilder setExecutor(@Nullable Executor executor) {
         this.executor = executor;
@@ -56,7 +55,6 @@ public class SQLExecutorBuilder {
      * @param <T>     the type
      * @return the @{@link SQLExecutorBuilder}
      */
-
     @NotNull
     public <T> SQLExecutorBuilder registerAdapter(@NotNull Class<T> clazz, @NotNull SQLResultAdapter<T> adapter) {
         adapters.put(clazz, adapter);
@@ -68,13 +66,11 @@ public class SQLExecutorBuilder {
      *
      * @return the @{@link SQLExecutor}
      */
-
     @NotNull
     public SQLExecutor build() {
         Map<Class<?>, SQLResultAdapter<?>> immutable = Collections.unmodifiableMap(adapters);
         return executor == null ?
                 new SQLExecutor(connector, immutable) :
                 new SQLExecutor(connector, immutable, executor);
-
     }
 }
