@@ -33,6 +33,7 @@ public final class SQLExecutor {
 
     @NotNull private final SQLConnector sqlConnector;
     @NotNull private final Map<Class<?>, SQLResultAdapter<?>> adapters;
+
     @NotNull private Executor executor = ForkJoinPool.commonPool();
 
     /**
@@ -158,9 +159,6 @@ public final class SQLExecutor {
                 prepare.accept(statement);
                 statement.execute();
                 result.accept(statement);
-
-            } catch (SQLException exception) {
-                exception.printStackTrace();
             }
         });
     }
@@ -263,9 +261,6 @@ public final class SQLExecutor {
                 try (ResultSet resultSet = statement.executeQuery()) {
                     reference.set(Optional.ofNullable(function.apply(resultSet)));
                 }
-
-            } catch (SQLException exception) {
-                exception.printStackTrace();
             }
         });
 
@@ -296,14 +291,7 @@ public final class SQLExecutor {
      * @see #queryAsync(String, Class) to execute in asynchronous thread
      */
     public <T> Optional<T> query(@Language("MySQL") @NotNull String query, @NotNull Class<T> clazz) {
-        return query(query, EMPTY_STATEMENT, resultSet -> {
-            try {
-                return resultSet.next() ? getAdapter(clazz).adaptResult(resultSet) : null;
-            } catch (SQLException e) {
-                e.printStackTrace();
-            }
-            return null;
-        });
+        return query(query, EMPTY_STATEMENT, resultSet -> resultSet.next() ? getAdapter(clazz).adaptResult(resultSet) : null);
     }
 
     /**
@@ -321,14 +309,7 @@ public final class SQLExecutor {
                                  @NotNull StatementConsumer consumer,
                                  @NotNull Class<T> clazz
     ) {
-        return query(query, consumer, resultSet -> {
-            try {
-                return resultSet.next() ? getAdapter(clazz).adaptResult(resultSet) : null;
-            } catch (SQLException e) {
-                e.printStackTrace();
-            }
-            return null;
-        });
+        return query(query, consumer, resultSet -> resultSet.next() ? getAdapter(clazz).adaptResult(resultSet) : null);
     }
 
     /**
@@ -358,8 +339,6 @@ public final class SQLExecutor {
             try (PreparedStatement statement = connection.prepareStatement(query)) {
                 consumer.accept(statement);
                 reference.set(Optional.ofNullable(statement.executeQuery()));
-            } catch (SQLException exception) {
-                exception.printStackTrace();
             }
         });
         return reference.get();
@@ -502,17 +481,10 @@ public final class SQLExecutor {
         return this.query(query, consumer, result -> {
 
             Set<T> elements = new LinkedHashSet<>();
-            while (true) {
-                try {
-                    if (!result.next()) break;
-                    T value = adapter.adaptResult(result);
-
-                    if (value != null) {
-                        elements.add(value);
-                    }
-                } catch (SQLException e) {
-                    e.printStackTrace();
-                }
+            while (result.next()) {
+                T value = adapter.adaptResult(result);
+                if (value != null)
+                    elements.add(value);
             }
 
             return elements;
@@ -634,9 +606,6 @@ public final class SQLExecutor {
 
                 statement.executeBatch();
                 result.accept(statement);
-
-            } catch (SQLException e) {
-                e.printStackTrace();
             }
         });
     }
@@ -681,6 +650,7 @@ public final class SQLExecutor {
     public @NotNull CompletableFuture<Void> executeBatchAsync(@NotNull BatchBuilder builder, @NotNull ResultSetConsumer result) {
         return CompletableFuture.runAsync(() -> this.executeBatch(builder, result));
     }
+
     /**
      * Executes a batched database execution and retrieve statement.
      *

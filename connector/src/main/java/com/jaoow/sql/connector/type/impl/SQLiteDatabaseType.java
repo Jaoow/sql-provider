@@ -1,5 +1,6 @@
 package com.jaoow.sql.connector.type.impl;
 
+import com.jaoow.sql.connector.ConnectorException;
 import com.jaoow.sql.connector.SQLConnector;
 import com.jaoow.sql.connector.type.SQLDatabaseType;
 import lombok.Builder;
@@ -56,6 +57,7 @@ public final class SQLiteDatabaseType extends SQLDatabaseType {
     }
 
     @Override
+    @NotNull
     public SQLConnector connect() throws SQLException {
 
         try {
@@ -66,9 +68,9 @@ public final class SQLiteDatabaseType extends SQLDatabaseType {
 
         return consumer -> {
             try (Connection connection = source.getConnection()) {
-                consumer.accept(connection);
+                consumer.execute(connection);
             } catch (SQLException exception) {
-                exception.printStackTrace();
+                throw new ConnectorException(exception);
             }
         };
     }

@@ -1,5 +1,6 @@
 package com.jaoow.sql.connector.type.impl;
 
+import com.jaoow.sql.connector.ConnectorException;
 import com.jaoow.sql.connector.SQLConnector;
 import com.jaoow.sql.connector.type.SQLDatabaseType;
 import com.zaxxer.hikari.HikariDataSource;
@@ -78,16 +79,16 @@ public class MySQLDatabaseType extends SQLDatabaseType {
     @NotNull
     @Override
     public SQLConnector connect() throws SQLException {
-
         // Test if connection was established.
         dataSource.getConnection().close();
 
         return consumer -> {
             try (Connection connection = dataSource.getConnection()) {
-                consumer.accept(connection);
-            } catch (SQLException e) {
-                e.printStackTrace();
+                consumer.execute(connection);
+            } catch (SQLException exception) {
+                throw new ConnectorException(exception);
             }
         };
+
     }
 }
