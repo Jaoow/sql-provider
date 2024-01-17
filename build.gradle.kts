@@ -1,6 +1,7 @@
 plugins {
     id("java")
     id("maven")
+    id("maven-publish")
 }
 
 group = "com.jaoow"
@@ -9,6 +10,7 @@ version = "1.0.0"
 subprojects {
     plugins.apply("java")
     plugins.apply("maven")
+    plugins.apply("maven-publish")
 
     repositories {
         mavenCentral()
