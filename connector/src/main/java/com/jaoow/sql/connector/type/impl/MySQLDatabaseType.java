@@ -1,5 +1,6 @@
 package com.jaoow.sql.connector.type.impl;
 
+import com.jaoow.sql.connector.ConnectorException;
 import com.jaoow.sql.connector.SQLConnector;
 import com.jaoow.sql.connector.type.SQLDatabaseType;
 import com.zaxxer.hikari.HikariDataSource;
@@ -85,7 +86,7 @@ public class MySQLDatabaseType extends SQLDatabaseType {
             try (Connection connection = dataSource.getConnection()) {
                 consumer.execute(connection);
             } catch (SQLException exception) {
-                throw new RuntimeException(exception);
+                throw new ConnectorException(exception);
             }
         };
 

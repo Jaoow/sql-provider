@@ -1,5 +1,6 @@
 package com.jaoow.sql.connector.type.impl;
 
+import com.jaoow.sql.connector.ConnectorException;
 import com.jaoow.sql.connector.SQLConnector;
 import com.jaoow.sql.connector.type.SQLDatabaseType;
 import lombok.Builder;
@@ -69,7 +70,7 @@ public final class SQLiteDatabaseType extends SQLDatabaseType {
             try (Connection connection = source.getConnection()) {
                 consumer.execute(connection);
             } catch (SQLException exception) {
-                throw new RuntimeException(exception);
+                throw new ConnectorException(exception);
             }
         };
     }
