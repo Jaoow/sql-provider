@@ -69,7 +69,7 @@ public final class SQLiteDatabaseType extends SQLDatabaseType {
             try (Connection connection = source.getConnection()) {
                 consumer.execute(connection);
             } catch (SQLException exception) {
-                throw new SQLException(exception);
+                throw new RuntimeException(exception);
             }
         };
     }

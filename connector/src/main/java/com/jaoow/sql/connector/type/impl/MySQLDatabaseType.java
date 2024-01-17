@@ -78,7 +78,6 @@ public class MySQLDatabaseType extends SQLDatabaseType {
     @NotNull
     @Override
     public SQLConnector connect() throws SQLException {
-
         // Test if connection was established.
         dataSource.getConnection().close();
 
@@ -86,8 +85,9 @@ public class MySQLDatabaseType extends SQLDatabaseType {
             try (Connection connection = dataSource.getConnection()) {
                 consumer.execute(connection);
             } catch (SQLException exception) {
-                throw new SQLException(exception);
+                throw new RuntimeException(exception);
             }
         };
+
     }
 }
