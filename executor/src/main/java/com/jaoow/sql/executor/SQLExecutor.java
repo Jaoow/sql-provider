@@ -15,6 +15,7 @@ import org.jetbrains.annotations.NotNull;
 
 import java.sql.*;
 import java.util.*;
+import java.util.concurrent.Callable;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
 import java.util.concurrent.ForkJoinPool;
@@ -693,11 +694,13 @@ public final class SQLExecutor {
      * If any exception is thrown during the execution of the runnable, it rolls back the transaction and rethrows the exception as a RuntimeException.
      * All code inside runnable  will be executed asynchronously using the default executor.
      *
-     * @param runnable the Runnable to be executed within the transaction
+     * @param callable the Runnable to be executed within the transaction
      * @return a CompletableFuture that will be completed when the transaction and the execution of the runnable are finished
      */
-    public CompletableFuture<Void> withTransaction(Runnable runnable) {
-        return CompletableFuture.runAsync(() -> {
+    public <T> CompletableFuture<T> withTransaction(Callable<T> callable) {
+        return CompletableFuture.supplyAsync(() -> {
+            final AtomicReference<T> result = new AtomicReference<T>();
+
             sqlConnector.execute(connection -> {
                 connection.setAutoCommit(false);
 
@@ -705,7 +708,7 @@ public final class SQLExecutor {
                 ThreadLocalTransaction.set(transactionHolder);
 
                 try {
-                    runnable.run();
+                    result.set(callable.call());
                     connection.commit();
                 } catch (Throwable t) {
                     connection.rollback();
@@ -714,6 +717,8 @@ public final class SQLExecutor {
                     ThreadLocalTransaction.remove();
                 }
             });
+
+            return result.get();
         }, executor);
     }
 
