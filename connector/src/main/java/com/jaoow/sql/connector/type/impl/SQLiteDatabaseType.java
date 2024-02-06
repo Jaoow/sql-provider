@@ -1,6 +1,6 @@
 package com.jaoow.sql.connector.type.impl;
 
-import com.jaoow.sql.connector.ConnectorException;
+import com.jaoow.sql.connector.exception.ConnectorException;
 import com.jaoow.sql.connector.SQLConnector;
 import com.jaoow.sql.connector.type.SQLDatabaseType;
 import lombok.Builder;

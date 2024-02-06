@@ -1,9 +1,10 @@
 package com.jaoow.sql.executor;
 
-import com.jaoow.sql.connector.ConnectorException;
+import com.jaoow.sql.connector.exception.ConnectorException;
 import com.jaoow.sql.connector.SQLConnector;
 import com.jaoow.sql.executor.adapter.SQLResultAdapter;
 import com.jaoow.sql.executor.batch.BatchBuilder;
+import com.jaoow.sql.executor.exception.ExecutorException;
 import com.jaoow.sql.executor.function.ResultSetConsumer;
 import com.jaoow.sql.executor.function.ResultSetFunction;
 import com.jaoow.sql.executor.function.StatementConsumer;
@@ -712,7 +713,7 @@ public final class SQLExecutor {
                     connection.commit();
                 } catch (Throwable t) {
                     connection.rollback();
-                    throw new RuntimeException(t);
+                    throw new ExecutorException(t);
                 } finally {
                     ThreadLocalTransaction.remove();
                 }

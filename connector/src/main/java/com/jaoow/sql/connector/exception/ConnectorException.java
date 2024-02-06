@@ -1,4 +1,4 @@
-package com.jaoow.sql.connector;
+package com.jaoow.sql.connector.exception;
 
 import lombok.NonNull;
 
