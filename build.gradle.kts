@@ -1,6 +1,5 @@
 plugins {
     id("java")
-    id("maven")
     id("maven-publish")
 }
 
@@ -9,12 +8,10 @@ version = "1.0.0"
 
 allprojects {
     plugins.apply("java")
-    plugins.apply("maven")
     plugins.apply("maven-publish")
 
     repositories {
         mavenCentral()
-        jcenter()
     }
 
     dependencies {
@@ -27,11 +24,10 @@ allprojects {
         val mysqlVersion = "8.0.15"
         val mariaDBVersion = "2.4.2";
 
-        annotationProcessor("org.projectlombok:lombok:$lombokVersion")
-        annotationProcessor("org.jetbrains:annotations:$annotationsVersion")
-
         compileOnly("org.projectlombok:lombok:$lombokVersion")
-        compileOnly("org.jetbrains:annotations:$annotationsVersion")
+        annotationProcessor("org.projectlombok:lombok:$lombokVersion")
+
+        implementation("org.jetbrains:annotations-java5:$annotationsVersion")
 
         implementation("com.zaxxer:HikariCP:$hikariVersion")
         implementation("org.slf4j:slf4j-api:$slf4jVersion")
@@ -48,7 +44,10 @@ tasks.withType<Javadoc> {
     setDependsOn(setOf("jar"))
 
     source(subprojects.flatMap { it.sourceSets.main.get().allJava })
-    setDestinationDir(file("$buildDir/docs/javadoc"));
+    setDestinationDir(file("${layout.buildDirectory.get()}/docs/javadoc"))
 
-    options.header("").addStringOption("https://docs.oracle.com/javase/8/docs/api/")
+    options.header("").apply {
+        links("https://docs.oracle.com/javase/8/docs/api/")
+        linksOffline("https://javadoc.io/doc/org.jetbrains/annotations/latest/", "${projectDir}/javadoc")
+    }
 }
