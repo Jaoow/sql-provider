@@ -19,6 +19,7 @@ public interface ResultSetFunction<R> {
      *
      * @param result The @{@link ResultSet}.
      * @return The result.
+     * @throws SQLException If an error occurs.
      */
     R apply(@NotNull ResultSet result) throws SQLException;
 

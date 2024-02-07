@@ -15,7 +15,8 @@ public interface ConnectionConsumer {
     /**
      * Performs this operation with the @{@link Connection}.
      *
-     * @param connection The @{@link Connection}.
+     * @param connection The connection.
+     * @throws SQLException If an error occurs.
      */
     void execute(@NotNull Connection connection) throws SQLException;
 
