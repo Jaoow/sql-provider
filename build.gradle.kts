@@ -41,7 +41,7 @@ allprojects {
 }
 
 tasks.withType<Javadoc> {
-    setDependsOn(setOf("jar"))
+    setDependsOn(setOf("clean"))
 
     source(subprojects.flatMap { it.sourceSets.main.get().allJava })
     setDestinationDir(file("${layout.buildDirectory.get()}/docs/javadoc"))
