@@ -1,0 +1,19 @@
+
+name: Deploy JavaDoc
+
+on:
+  push:
+    branches: [ "master" ]
+    
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Deploy JavaDoc
+        uses: MathieuSoysal/Javadoc-publisher.yml@v2.4.0
+        with:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          project: gradle
+          java-version: 8
+          javadoc-branch: javadoc
+          target-folder: javadoc 
