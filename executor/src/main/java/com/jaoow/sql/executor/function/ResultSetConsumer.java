@@ -15,7 +15,8 @@ public interface ResultSetConsumer {
     /**
      * Performs this operation with the @{@link ResultSet}.
      *
-     * @param result The @{@link ResultSet}.
+     * @param result The result.
+     * @throws SQLException If an error occurs.
      */
     void accept(@NotNull ResultSet result) throws SQLException;
 

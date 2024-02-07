@@ -13,9 +13,16 @@ import java.sql.SQLException;
 public interface StatementConsumer {
 
     /**
+     * An empty statement.
+     */
+    StatementConsumer EMPTY_STATEMENT = statement -> {
+    };
+
+    /**
      * Performs this operation with the @{@link PreparedStatement}.
      *
-     * @param statement The @{@link PreparedStatement}.
+     * @param statement The statement.
+     * @throws SQLException If an error occurs.
      */
     void accept(@NotNull PreparedStatement statement) throws SQLException;
 

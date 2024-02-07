@@ -1,20 +1,17 @@
 plugins {
     id("java")
-    id("maven")
     id("maven-publish")
 }
 
 group = "com.jaoow"
 version = "1.0.0"
 
-subprojects {
+allprojects {
     plugins.apply("java")
-    plugins.apply("maven")
     plugins.apply("maven-publish")
 
     repositories {
         mavenCentral()
-        jcenter()
     }
 
     dependencies {
@@ -23,23 +20,37 @@ subprojects {
 
         val hikariVersion = "4.0.3"
         val slf4jVersion = "1.7.32"
-        val sqliteVersion = "3.36.0.2"
-        val mysqlVersion = "8.0.15"
-        val mariaDBVersion = "2.4.2";
+        val sqliteVersion = "3.45.1.0"
+        val mysqlVersion = "8.0.33"
+        val mariaDBVersion = "3.3.2";
 
-        compileOnly("org.projectlombok:lombok:$lombokVersion")
-        compileOnly("org.jetbrains:annotations:$annotationsVersion")
-
+        // Lombok
         annotationProcessor("org.projectlombok:lombok:$lombokVersion")
-        annotationProcessor("org.jetbrains:annotations:$annotationsVersion")
+        compileOnly("org.projectlombok:lombok:$lombokVersion")
 
+        // Jetbrains Annotations
+        compileOnly("org.jetbrains:annotations-java5:$annotationsVersion")
+
+        // HikariCP
         implementation("com.zaxxer:HikariCP:$hikariVersion")
         implementation("org.slf4j:slf4j-api:$slf4jVersion")
         implementation("org.slf4j:slf4j-simple:$slf4jVersion")
 
-        compileOnly("org.xerial:sqlite-jdbc:$sqliteVersion")
+        // Databases
+        implementation("org.xerial:sqlite-jdbc:$sqliteVersion")
+        implementation("mysql:mysql-connector-java:$mysqlVersion")
+        implementation("org.mariadb.jdbc:mariadb-java-client:$mariaDBVersion")
+    }
+}
 
-        testImplementation("mysql:mysql-connector-java:$mysqlVersion")
-        testImplementation("org.mariadb.jdbc:mariadb-java-client:$mariaDBVersion")
+tasks.withType<Javadoc> {
+    setDependsOn(setOf("clean"))
+
+    source(subprojects.flatMap { it.sourceSets.main.get().allJava })
+    setDestinationDir(file("${layout.buildDirectory.get()}/docs/javadoc"))
+
+    options.header("").apply {
+        links("https://docs.oracle.com/javase/8/docs/api/")
+        linksOffline("https://javadoc.io/doc/org.jetbrains/annotations/latest/", "${projectDir}/javadoc")
     }
 }
