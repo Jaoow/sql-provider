@@ -16,5 +16,5 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           project: gradle
           java-version: 8
-          javadoc-branch: javadoc
+          javadoc-branch: gh-pages
           target-folder: javadoc 
