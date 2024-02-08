@@ -20,6 +20,9 @@ SQL provider is a lightweight library to handle SQL operations.
   - [Transactions](#transactions)
   - [Adapters](#adapters)
 
+The link to the project's Javadoc is 
+[here](https://jaoow.github.io/sql-provider/javadoc/).
+
 ## Installation
 
 [![Jitpack](https://jitpack.io/v/Jaoow/sql-provider.svg)](https://jitpack.io/#Jaoow/sql-provider)
