@@ -1,5 +1,5 @@
 plugins {
-    id("java")
+    id("java-library")
     id("maven-publish")
 }
 
@@ -12,6 +12,20 @@ allprojects {
 
     repositories {
         mavenCentral()
+        mavenLocal()
+    }
+
+    publishing {
+        publications {
+            create<MavenPublication>("maven") {
+                from(components["java"])
+
+                groupId = rootProject.group.toString()
+                version = rootProject.version.toString()
+
+                println("Publishing: ${groupId}:${artifactId}:${version}")
+            }
+        }
     }
 
     dependencies {
