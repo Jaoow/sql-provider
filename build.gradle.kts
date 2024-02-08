@@ -22,8 +22,6 @@ allprojects {
 
                 groupId = rootProject.group.toString()
                 version = rootProject.version.toString()
-
-                println("Publishing: ${groupId}:${artifactId}:${version}")
             }
         }
     }
