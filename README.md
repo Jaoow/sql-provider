@@ -30,9 +30,6 @@ If you want to add this library to your project, you can use either
 
 ### Maven
 
-<details>
-<summary>Click to expand</summary>
-
 ```xml
 <repository>
     <id>jitpack</id>
@@ -48,12 +45,7 @@ If you want to add this library to your project, you can use either
 </dependency>
 ```
 
-</details>
-
 ### Gradle
-
-<details>
-<summary>Click to expand</summary>
 
 ```gradle
 repositories {
@@ -64,8 +56,6 @@ dependencies {
     implementation 'com.github.Jaoow:sql-provider:{version}'
 }
 ```
-
-</details>
 
 ## Initializing connector
 
@@ -96,7 +86,7 @@ MySQLDatabaseType type = MySQLDatabaseType.builder()
 SQLConnector connector = type.connect();
 ```
 
-**Obs:**  When using the `connect()` method, an attempt will be made
+> :memo: **Note:**  When using the `connect()` method, an attempt will be made
 to connect to the database.
 
 ## Performing operations
@@ -114,7 +104,7 @@ The executor has several methods to perform operations on the database.
 For example, to create the table.
 
 ```java
-executor.execute("CREATE TABLE IF NOT EXISTS table (column1 VARCHAR(16), column2 VARCHAR(16))");
+executor.execute("CREATE TABLE table (col1 VARCHAR(16), col2 VARCHAR(16))");
 ```
 
 Examples for inserting values into the table or other similar operations.
@@ -123,14 +113,18 @@ possibility of directly obtaining the ResultSet, you will have an example
 of this later.
 
 ```java
-executor.execute("INSERT INTO table (column1, column2) VALUES (?, ?)", (StatementConsumer) statement -> {
+executor.execute("INSERT INTO table (col1, col2) VALUES (?, ?)",
+                (StatementConsumer) statement -> {
+
     statement.setString(1, "value1");
     statement.setString(2, "value2");
 });
 ```
 
 ```java
-executor.executeAsync("INSERT INTO table (column1, column2) VALUES (?, ?)", (StatementConsumer) statement -> {
+executor.executeAsync("INSERT INTO table (col1, col2) VALUES (?, ?)", 
+                (StatementConsumer) statement -> {
+    
     statement.setString(1, "value1");
     statement.setString(2, "value2");
 }).whenComplete((unused, error) -> {
@@ -236,4 +230,6 @@ SQL Provider is an open source project, and gladly accepts community contributio
 
 -----
 
-###### This project was based on [sql-provider by HenryFabio](https://github.com/HenryFabio/sql-provider) with some modifications
+> This project was based on
+> [sql-provider by HenryFabio](https://github.com/HenryFabio/sql-provider)
+> with some modifications
