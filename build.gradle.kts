@@ -10,48 +10,47 @@ allprojects {
     plugins.apply("java")
     plugins.apply("maven-publish")
 
+    tasks.withType<JavaCompile> {
+        options.encoding = "UTF-8"
+
+        sourceCompatibility = "8"
+        targetCompatibility = "8"
+    }
+
     repositories {
         mavenCentral()
         mavenLocal()
     }
 
+    configurations.all {
+        resolutionStrategy.cacheChangingModulesFor(0, TimeUnit.SECONDS)
+    }
+
+    dependencies {
+        // Lombok
+        rootProject.libs.lombok.let {
+            compileOnly(it)
+            annotationProcessor(it)
+            testAnnotationProcessor(it)
+            testCompileOnly(it)
+        }
+
+        // jetbrains
+        rootProject.libs.jetbrains.let {
+            compileOnly(it)
+            testCompileOnly(it)
+        }
+    }
+
     publishing {
         publications {
-            create<MavenPublication>("maven") {
+            create<MavenPublication>("${rootProject.name}-${this@allprojects.name}") {
                 from(components["java"])
 
                 groupId = rootProject.group.toString()
                 version = rootProject.version.toString()
             }
         }
-    }
-
-    dependencies {
-        val lombokVersion = "1.18.22"
-        val annotationsVersion = "21.0.1"
-
-        val hikariVersion = "4.0.3"
-        val sqliteVersion = "3.45.1.0"
-        val mysqlVersion = "8.0.33"
-        val mariaDBVersion = "3.3.2";
-
-        // Lombok
-        annotationProcessor("org.projectlombok:lombok:$lombokVersion")
-        compileOnly("org.projectlombok:lombok:$lombokVersion")
-
-        testAnnotationProcessor("org.projectlombok:lombok:$lombokVersion")
-        testCompileOnly("org.projectlombok:lombok:$lombokVersion")
-
-        // Jetbrains Annotations
-        compileOnly("org.jetbrains:annotations-java5:$annotationsVersion")
-
-        // HikariCP
-        implementation("com.zaxxer:HikariCP:$hikariVersion")
-
-        // Databases
-        implementation("org.xerial:sqlite-jdbc:$sqliteVersion")
-        implementation("mysql:mysql-connector-java:$mysqlVersion")
-        implementation("org.mariadb.jdbc:mariadb-java-client:$mariaDBVersion")
     }
 }
 
