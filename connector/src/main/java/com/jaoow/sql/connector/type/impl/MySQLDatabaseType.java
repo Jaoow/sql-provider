@@ -83,8 +83,7 @@ public class MySQLDatabaseType extends SQLDatabaseType {
     }
 
     private void initDataSource() {
-        HikariDataSource dataSource = new HikariDataSource();
-
+        dataSource = new HikariDataSource();
         dataSource.setJdbcUrl(String.format(this.getJdbcUrl(), address, database));
         dataSource.setDriverClassName(this.getDriverClassName());
 
