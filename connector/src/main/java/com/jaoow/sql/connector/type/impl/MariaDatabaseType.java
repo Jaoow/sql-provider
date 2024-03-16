@@ -1,12 +1,12 @@
 package com.jaoow.sql.connector.type.impl;
 
-import org.jetbrains.annotations.NotNull;
+import lombok.NonNull;
+import lombok.experimental.SuperBuilder;
 
+@SuperBuilder
 public class MariaDatabaseType extends MySQLDatabaseType {
 
-    public MariaDatabaseType(@NotNull String address, @NotNull String username,
-                             @NotNull String password, @NotNull String database) {
-
+    public MariaDatabaseType(@NonNull String address, @NonNull String username, @NonNull String password, @NonNull String database) {
         super(address, username, password, database);
     }
 

@@ -31,7 +31,6 @@ allprojects {
         val annotationsVersion = "21.0.1"
 
         val hikariVersion = "4.0.3"
-        val slf4jVersion = "1.7.32"
         val sqliteVersion = "3.45.1.0"
         val mysqlVersion = "8.0.33"
         val mariaDBVersion = "3.3.2";
@@ -40,13 +39,14 @@ allprojects {
         annotationProcessor("org.projectlombok:lombok:$lombokVersion")
         compileOnly("org.projectlombok:lombok:$lombokVersion")
 
+        testAnnotationProcessor("org.projectlombok:lombok:$lombokVersion")
+        testCompileOnly("org.projectlombok:lombok:$lombokVersion")
+
         // Jetbrains Annotations
         compileOnly("org.jetbrains:annotations-java5:$annotationsVersion")
 
         // HikariCP
         implementation("com.zaxxer:HikariCP:$hikariVersion")
-        implementation("org.slf4j:slf4j-api:$slf4jVersion")
-        implementation("org.slf4j:slf4j-simple:$slf4jVersion")
 
         // Databases
         implementation("org.xerial:sqlite-jdbc:$sqliteVersion")
