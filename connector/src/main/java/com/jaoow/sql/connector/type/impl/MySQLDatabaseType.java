@@ -11,6 +11,8 @@ import org.jetbrains.annotations.NotNull;
 
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 
@@ -31,6 +33,7 @@ public class MySQLDatabaseType extends SQLDatabaseType {
     @NonNull private final String database;
 
     private HikariDataSource dataSource;
+    private List<Consumer<HikariDataSource>> dataSourceConfigurations = new ArrayList<>();
 
     public MySQLDatabaseType(@NonNull String address, @NonNull String username, @NonNull String password, @NonNull String database) {
         super("com.mysql.cj.jdbc.Driver", "jdbc:mysql://%s/%s");
@@ -58,7 +61,7 @@ public class MySQLDatabaseType extends SQLDatabaseType {
     @Deprecated
     @Contract("_ -> this")
     public SQLDatabaseType configureDataSource(@NotNull Consumer<HikariDataSource> consumer) {
-        consumer.accept(dataSource);
+        this.dataSourceConfigurations.add(consumer);
         return this;
     }
 
@@ -114,6 +117,8 @@ public class MySQLDatabaseType extends SQLDatabaseType {
         dataSource.addDataSourceProperty("cacheCallableStmts", "true");
 
         dataSource.addDataSourceProperty("socketTimeout", String.valueOf(TimeUnit.SECONDS.toMillis(30)));
+
+        this.dataSourceConfigurations.forEach(consumer -> consumer.accept(dataSource));
     }
 
     @SuppressWarnings("unused")
