@@ -2,6 +2,7 @@
 
 [![Open Source Love](https://badges.frapsoft.com/os/v1/open-source.svg?v=100)](https://github.com/ellerbrock/open-source-badges/)
 [![Codacy Badge](https://app.codacy.com/project/badge/Grade/698f97b0b74b49058022cc55eeacbca9)](https://app.codacy.com/gh/Jaoow/sql-provider/dashboard)
+[![Javadoc](https://img.shields.io/badge/JavaDoc-Online-green)](https://jaoow.github.io/sql-provider/)
 [![GitHub Repo stars](https://img.shields.io/github/stars/Jaoow/sql-provider?style=plastic&color=lime_green)](https://github.com/Jaoow/sql-provider/stargazers)
 
 SQL provider is a lightweight library to handle SQL operations.
@@ -19,9 +20,6 @@ SQL provider is a lightweight library to handle SQL operations.
   - [Batch Operations](#batch-operations)
   - [Transactions](#transactions)
   - [Adapters](#adapters)
-
-The link to the project's Javadoc is 
-[here](https://jaoow.github.io/sql-provider/javadoc/).
 
 ## Installation
 
