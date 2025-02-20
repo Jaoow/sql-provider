@@ -5,17 +5,20 @@ import com.jaoow.sql.connector.SQLConnector;
 import com.jaoow.sql.connector.type.SQLDatabaseType;
 import com.zaxxer.hikari.HikariDataSource;
 import lombok.Builder;
+import lombok.NonNull;
+import lombok.experimental.SuperBuilder;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 
+@SuperBuilder
 public class MySQLDatabaseType extends SQLDatabaseType {
-
-    private final HikariDataSource dataSource = new HikariDataSource();
 
     // https://github.com/lucko/helper/blob/master/helper-sql/src/main/java/me/lucko/helper/sql/plugin/HelperSql.java
     private static final int MAXIMUM_POOL_SIZE = (Runtime.getRuntime().availableProcessors() * 2) + 1;
@@ -25,10 +28,69 @@ public class MySQLDatabaseType extends SQLDatabaseType {
     private static final long CONNECTION_TIMEOUT = TimeUnit.SECONDS.toMillis(10);
     private static final long LEAK_DETECTION_THRESHOLD = TimeUnit.SECONDS.toMillis(10);
 
-    @Builder
-    public MySQLDatabaseType(@NotNull String address, @NotNull String username, @NotNull String password, @NotNull String database) {
-        super("com.mysql.jdbc.Driver", "jdbc:mysql://%s/%s");
+    @NonNull private final String address;
+    @NonNull private final String username;
+    @NonNull private final String password;
+    @NonNull private final String database;
 
+    @Builder.Default
+    private final List<Consumer<HikariDataSource>> dataSourceConfigurations = new ArrayList<>();
+
+    private HikariDataSource dataSource;
+
+    public MySQLDatabaseType(@NonNull String address, @NonNull String username, @NonNull String password, @NonNull String database) {
+        super("com.mysql.cj.jdbc.Driver", "jdbc:mysql://%s/%s");
+
+        this.address = address;
+        this.username = username;
+        this.password = password;
+        this.database = database;
+        this.dataSourceConfigurations = new ArrayList<>();
+    }
+
+    @Override
+    public String getJdbcUrl() {
+        return "jdbc:mysql://%s/%s";
+    }
+
+    @Override
+    public String getDriverClassName() {
+        try {
+            return Class.forName("com.mysql.cj.jdbc.Driver").getName();
+        } catch (ClassNotFoundException exception) {
+            return "com.mysql.jdbc.Driver";
+        }
+    }
+
+    @Deprecated
+    @Contract("_ -> this")
+    public SQLDatabaseType configureDataSource(@NotNull Consumer<HikariDataSource> consumer) {
+        this.dataSourceConfigurations.add(consumer);
+        return this;
+    }
+
+    @NotNull
+    @Override
+    public SQLConnector connect() throws SQLException {
+        if (this.dataSource == null) {
+            this.initDataSource();
+        }
+
+        // Test if connection was established.
+        dataSource.getConnection().close();
+
+        return consumer -> {
+            try (Connection connection = dataSource.getConnection()) {
+                consumer.execute(connection);
+            } catch (SQLException exception) {
+                throw new ConnectorException(exception);
+            }
+        };
+
+    }
+
+    private void initDataSource() {
+        dataSource = new HikariDataSource();
         dataSource.setJdbcUrl(String.format(this.getJdbcUrl(), address, database));
         dataSource.setDriverClassName(this.getDriverClassName());
 
@@ -59,36 +121,23 @@ public class MySQLDatabaseType extends SQLDatabaseType {
         dataSource.addDataSourceProperty("cacheCallableStmts", "true");
 
         dataSource.addDataSourceProperty("socketTimeout", String.valueOf(TimeUnit.SECONDS.toMillis(30)));
+
+        this.dataSourceConfigurations.forEach(consumer -> consumer.accept(dataSource));
     }
 
-    @Override
-    public String getDriverClassName() {
-        try {
-            return Class.forName("com.mysql.cj.jdbc.Driver").getName();
-        } catch (ClassNotFoundException exception) {
-            return "com.mysql.jdbc.Driver";
+    @SuppressWarnings("unused")
+    public static abstract class MySQLDatabaseTypeBuilder<C extends MySQLDatabaseType, B extends MySQLDatabaseTypeBuilder<C, B>> extends SQLDatabaseTypeBuilder<C, B> {
+
+        protected B dataSource(HikariDataSource dataSource) {
+            this.self().dataSource(dataSource);
+            return self();
         }
-    }
 
-    @Contract("_ -> this")
-    public SQLDatabaseType configureDataSource(@NotNull Consumer<HikariDataSource> consumer) {
-        consumer.accept(dataSource);
-        return this;
-    }
-
-    @NotNull
-    @Override
-    public SQLConnector connect() throws SQLException {
-        // Test if connection was established.
-        dataSource.getConnection().close();
-
-        return consumer -> {
-            try (Connection connection = dataSource.getConnection()) {
-                consumer.execute(connection);
-            } catch (SQLException exception) {
-                throw new ConnectorException(exception);
-            }
-        };
+        protected B dataSourceConfigurations(List<Consumer<HikariDataSource>> dataSourceConfigurations) {
+            this.self().dataSourceConfigurations(dataSourceConfigurations);
+            return self();
+        }
 
     }
+
 }
