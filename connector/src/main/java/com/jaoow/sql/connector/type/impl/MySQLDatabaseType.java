@@ -4,6 +4,7 @@ import com.jaoow.sql.connector.exception.ConnectorException;
 import com.jaoow.sql.connector.SQLConnector;
 import com.jaoow.sql.connector.type.SQLDatabaseType;
 import com.zaxxer.hikari.HikariDataSource;
+import lombok.Builder;
 import lombok.NonNull;
 import lombok.experimental.SuperBuilder;
 import org.jetbrains.annotations.Contract;
@@ -32,8 +33,10 @@ public class MySQLDatabaseType extends SQLDatabaseType {
     @NonNull private final String password;
     @NonNull private final String database;
 
+    @Builder.Default
+    private final List<Consumer<HikariDataSource>> dataSourceConfigurations = new ArrayList<>();
+
     private HikariDataSource dataSource;
-    private List<Consumer<HikariDataSource>> dataSourceConfigurations = new ArrayList<>();
 
     public MySQLDatabaseType(@NonNull String address, @NonNull String username, @NonNull String password, @NonNull String database) {
         super("com.mysql.cj.jdbc.Driver", "jdbc:mysql://%s/%s");
@@ -42,6 +45,7 @@ public class MySQLDatabaseType extends SQLDatabaseType {
         this.username = username;
         this.password = password;
         this.database = database;
+        this.dataSourceConfigurations = new ArrayList<>();
     }
 
     @Override
@@ -126,6 +130,11 @@ public class MySQLDatabaseType extends SQLDatabaseType {
 
         protected B dataSource(HikariDataSource dataSource) {
             this.self().dataSource(dataSource);
+            return self();
+        }
+
+        protected B dataSourceConfigurations(List<Consumer<HikariDataSource>> dataSourceConfigurations) {
+            this.self().dataSourceConfigurations(dataSourceConfigurations);
             return self();
         }
 
